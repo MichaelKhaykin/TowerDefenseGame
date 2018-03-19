@@ -44,8 +44,8 @@ namespace TowerDefenseGameWillFinishThisOne
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            graphics.PreferredBackBufferWidth = widthOfCurrentScreen / 2;
-            graphics.PreferredBackBufferHeight = heightOfCurrentScreen / 2;
+            graphics.PreferredBackBufferWidth = widthOfCurrentScreen;
+            graphics.PreferredBackBufferHeight = heightOfCurrentScreen;
             graphics.ApplyChanges();
             IsMouseVisible = true;
             base.Initialize();
@@ -60,12 +60,12 @@ namespace TowerDefenseGameWillFinishThisOne
 
 
             //900 is the width of my screen and 1080 is the width of the texture (which is the backGround)
-
             
             Texture2D backgroundTexture = Content.Load<Texture2D>("background");
 
             //All game assets are scaled to 1920x1080 (16:9 Full HD) screen
             ScreenScale = (float)GraphicsDevice.Viewport.Height / (float)backgroundTexture.Height;
+
             Background = new Sprite(backgroundTexture, new Vector2(GraphicsDevice.Viewport.Width / 2, GraphicsDevice.Viewport.Height / 2), Color.White, new Vector2(ScreenScale), null);
 
             pixel = new Texture2D(GraphicsDevice, 1, 1);
@@ -79,7 +79,8 @@ namespace TowerDefenseGameWillFinishThisOne
             screens.Add(ScreenStates.Setting, new SettingsScreen(GraphicsDevice, Content));
             screens.Add(ScreenStates.Rules, new RulesScreen(GraphicsDevice, Content));
             screens.Add(ScreenStates.ChoosePlayOrMakeMap, new ChoosePlayOrMakeMap(GraphicsDevice, Content));
-           
+            screens.Add(ScreenStates.MakeMap, new MakeMapScreen(GraphicsDevice, Content));
+
             song = Content.Load<Song>("MusicForTowerDefense");
             
             MediaPlayer.Play(song);
@@ -99,6 +100,14 @@ namespace TowerDefenseGameWillFinishThisOne
             SpriteScales.Add("BackButton", 0.5f);
             SpriteScales.Add("ChoicesSprite", 0.96f);
             SpriteScales.Add("MakeMapButton", 2f);
+            SpriteScales.Add("BattleButton", 1f);
+            SpriteScales.Add("RoadPieces/RightUpArcPiece", 0.25f);
+            SpriteScales.Add("RoadPieces/RightDownArcPiece", 0.25f);
+            SpriteScales.Add("RoadPieces/LeftUpArcPiece", 0.25f);
+            SpriteScales.Add("RoadPieces/LeftDownArcPiece", 0.25f);
+            SpriteScales.Add("RoadPieces/StraightHorizontalPiece", 0.25f);
+            SpriteScales.Add("RoadPieces/StraightVerticalPiece", 0.25f);
+            SpriteScales.Add("SaveButton", 1f);
         }
 
         protected override void Update(GameTime gameTime)

@@ -17,4 +17,12 @@ namespace TowerDefenseGameWillFinishThisOne
         Setting,
         Rules
     }
+
+    public enum ConnectionTypes
+    {
+        Bottom,
+        Top,
+        Left,
+        Right
+    }
 }

@@ -19,7 +19,6 @@ namespace TowerDefenseGameWillFinishThisOne
 
         public RulesScreen(GraphicsDevice graphics, ContentManager content) : base(graphics, content)
         {
-
             font = Content.Load<SpriteFont>("TextFont");
             label = new TextLabel(new Vector2(-10, -10), Color.White, "", font);
             
