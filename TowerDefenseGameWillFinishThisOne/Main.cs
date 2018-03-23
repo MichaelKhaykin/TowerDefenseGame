@@ -107,7 +107,9 @@ namespace TowerDefenseGameWillFinishThisOne
             SpriteScales.Add("RoadPieces/LeftDownArcPiece", 0.25f);
             SpriteScales.Add("RoadPieces/StraightHorizontalPiece", 0.25f);
             SpriteScales.Add("RoadPieces/StraightVerticalPiece", 0.25f);
+            SpriteScales.Add("RoadPieces/4SideCrossPiece", 0.25f);
             SpriteScales.Add("SaveButton", 1f);
+            SpriteScales.Add("LoadButton", 2f);
         }
 
         protected override void Update(GameTime gameTime)

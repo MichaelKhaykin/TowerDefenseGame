@@ -18,8 +18,8 @@ namespace TowerDefenseGameWillFinishThisOne
         Rules
     }
 
-    public enum ConnectionTypes
-    {
+    public enum ConnectionTypes 
+    { 
         Bottom,
         Top,
         Left,

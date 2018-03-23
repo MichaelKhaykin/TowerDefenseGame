@@ -249,18 +249,6 @@
 /processorParam:TextureFormat=Color
 /build:SaveButton.png
 
-#begin RoadPieces/Lel.png
-/importer:TextureImporter
-/processor:TextureProcessor
-/processorParam:ColorKeyColor=255,0,255,255
-/processorParam:ColorKeyEnabled=True
-/processorParam:GenerateMipmaps=False
-/processorParam:PremultiplyAlpha=True
-/processorParam:ResizeToPowerOfTwo=False
-/processorParam:MakeSquare=False
-/processorParam:TextureFormat=Color
-/build:RoadPieces/Lel.png
-
 #begin RoadPieces/StraightHorizontalPiece.png
 /importer:TextureImporter
 /processor:TextureProcessor
@@ -296,4 +284,16 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:LoadButton.png
+
+#begin RoadPieces/4SideCrossPiece.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:RoadPieces/4SideCrossPiece.png
 
