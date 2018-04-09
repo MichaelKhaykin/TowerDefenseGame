@@ -35,6 +35,8 @@ namespace TowerDefenseGameWillFinishThisOne
 
         Texture2D pixel;
 
+
+
         public Main()
         {
             graphics = new GraphicsDeviceManager(this);
@@ -110,6 +112,12 @@ namespace TowerDefenseGameWillFinishThisOne
             SpriteScales.Add("RoadPieces/4SideCrossPiece", 0.25f);
             SpriteScales.Add("SaveButton", 1f);
             SpriteScales.Add("LoadButton", 2f);
+            SpriteScales.Add("MarkStartTile", 0.5f);
+            SpriteScales.Add("MarkEndTile", 0.5f);
+            SpriteScales.Add("Towers/Tower1", 0.3f);
+            SpriteScales.Add("Towers/Tower2", 0.3f);
+            SpriteScales.Add("Towers/Tower3", 0.3f);
+            SpriteScales.Add("Eraser", 0.3f);
         }
 
         protected override void Update(GameTime gameTime)
@@ -120,7 +128,7 @@ namespace TowerDefenseGameWillFinishThisOne
             mouse = Mouse.GetState();
             
             screens[CurrentScreen].Update(gameTime);
-
+            
             oldMouse = mouse;
 
             // TODO: Add your update logic here
@@ -155,7 +163,6 @@ namespace TowerDefenseGameWillFinishThisOne
             return new Button(renderTarget, position, Color.White, new Vector2(Main.ScreenScale), null);
         }
 
-
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
@@ -163,8 +170,7 @@ namespace TowerDefenseGameWillFinishThisOne
             // TODO: Add your drawing code here
 
             spriteBatch.Begin();
-
-            
+      
             screens[CurrentScreen].Draw(spriteBatch);
 
             spriteBatch.End();

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -29,12 +30,18 @@ namespace TowerDefenseGameWillFinishThisOne
 
         public override bool Equals(object obj)
         {
-            return (Edge<TVertex, TEdge>)obj == this;
+            var edge = obj as Edge<TVertex, TEdge>;
+            return edge == this;
         }
 
         public static bool operator ==(Edge<TVertex, TEdge> lhs, Edge<TVertex, TEdge> rhs)
         {
-            if(lhs.firstVertex == rhs.firstVertex && lhs.secondVertex == rhs.secondVertex && lhs.Weight == rhs.Weight)
+            if(lhs is null || rhs is null)
+            {
+                return false;
+            }
+
+            if (lhs.firstVertex == rhs.firstVertex && lhs.secondVertex == rhs.secondVertex && lhs.Weight == rhs.Weight)
             {
                 return true;
             }

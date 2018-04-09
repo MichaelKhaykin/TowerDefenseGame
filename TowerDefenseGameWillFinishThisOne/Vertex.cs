@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace TowerDefenseGameWillFinishThisOne
 {
+    [JsonObject(IsReference = true)]
     public class Vertex<TVertex, TEdge>
     {
         public List<Edge<TVertex, TEdge>> Edges = new List<Edge<TVertex, TEdge>>();
@@ -18,7 +20,8 @@ namespace TowerDefenseGameWillFinishThisOne
 
         public override bool Equals(object obj)
         {
-            return (Vertex<TVertex, TEdge>)obj == this;
+            var vertex = obj as Vertex<TVertex, TEdge>;
+            return vertex == this;
         }
 
         public override int GetHashCode()

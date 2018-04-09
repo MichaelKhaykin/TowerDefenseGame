@@ -16,9 +16,7 @@ namespace TowerDefenseGameWillFinishThisOne
         Button MakeMapButton;
         Button BattleButton;
 
-        TextLabel label;
-        SpriteFont font;
-
+    
         public ChoosePlayOrMakeMap(GraphicsDevice graphics, ContentManager content) 
             :base(graphics, content)
         {
@@ -27,16 +25,12 @@ namespace TowerDefenseGameWillFinishThisOne
             MakeMapButton = new Button(Content.Load<Texture2D>("MakeMapButton"), ChoiceSprite.Position + new Vector2(-300, -247) * Main.ScreenScale, Color.White, new Vector2(Main.SpriteScales["MakeMapButton"] * Main.ScreenScale), null);
             BattleButton = new Button(Content.Load<Texture2D>("BattleButton"), ChoiceSprite.Position + new Vector2(300, -247) * Main.ScreenScale, Color.White, new Vector2(Main.SpriteScales["BattleButton"] * Main.ScreenScale), null);
 
-            font = Content.Load<SpriteFont>("TextFont");
-
-            label = new TextLabel(new Vector2(MakeMapButton.X - MakeMapButton.ScaledWidth / 2 * Main.ScreenScale, MakeMapButton.Y + MakeMapButton.ScaledHeight / 2 * Main.ScreenScale), Color.Yellow, "Make                  Map", font);
-
+    
             Sprites.Add(Main.Background);
             Sprites.Add(Main.Tint);
             Sprites.Add(ChoiceSprite);
             Sprites.Add(MakeMapButton);
             Sprites.Add(BattleButton);
-            Sprites.Add(label);
         }
 
         public override void Update(GameTime gameTime)

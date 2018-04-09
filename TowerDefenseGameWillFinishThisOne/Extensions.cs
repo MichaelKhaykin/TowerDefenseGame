@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +10,19 @@ namespace TowerDefenseGameWillFinishThisOne
 {
     public static class Extensions
     {
+        public static void DrawLine(this SpriteBatch spriteBatch, Line line, Texture2D pixel, float width, Color color, bool drawEndPoints = false)
+        {
+            var scale = new Vector2(line.Length, width);
+            var position = new Vector2(line.StartX, line.StartY);
+
+            spriteBatch.Draw(pixel, position, null, color, line.Angle, Vector2.Zero, scale, SpriteEffects.None, 0);
+
+            if (drawEndPoints)
+            {
+                spriteBatch.Draw(pixel, new Rectangle((int)line.StartX, (int)line.StartY, 3, 3), Color.Yellow);
+                spriteBatch.Draw(pixel, new Rectangle((int)line.EndX, (int)line.EndY, 3, 3), Color.Yellow);
+            }
+        }
 
         public static bool VEquals(this Vector2 a, Vector2 b)
         {

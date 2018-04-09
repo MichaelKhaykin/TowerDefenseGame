@@ -8,8 +8,10 @@ namespace TowerDefenseGameWillFinishThisOne
 {
     public class Graph<TVertex, TEdge> 
     {
-        private List<Vertex<TVertex, TEdge>> Vertices = new List<Vertex<TVertex, TEdge>>();
-        private List<Edge<TVertex, TEdge>> Edges = new List<Edge<TVertex, TEdge>>();
+        public int Count { get; private set; } = 0;
+
+        public List<Vertex<TVertex, TEdge>> Vertices = new List<Vertex<TVertex, TEdge>>();
+        public List<Edge<TVertex, TEdge>> Edges = new List<Edge<TVertex, TEdge>>();
 
         public Vertex<TVertex, TEdge> FindVertex(Vertex<TVertex, TEdge> vertexLikeThisOne)
         {
@@ -61,26 +63,41 @@ namespace TowerDefenseGameWillFinishThisOne
             Edges.Add(edge1);
         }
 
-        public void AddVertex(Vertex<TVertex, TEdge> vertex)
+        public bool AddVertex(Vertex<TVertex, TEdge> vertex)
         {
             if (DoesHaveVertex(vertex))
-            { 
-                //THIS WILL THROW AN EXCEPTION IF YOU COMPLETE A SHAPE, THE REASON WHY IS BECAUSE IT GETS
-                //ADDED TO THE VERTICES LIST TWICE IN THE IF STATEMENTS IN THE MAKE MAP SCREEN, EASY SOLUTION,
-                //HAVE A BOOLEAN CHECKING WHICH IF STATEMENT THE TILE WENT INTO, IF IT WENT INTO MORE THAN 1,
-                //IF STATEMENT, then dont let them place it
-                //Vertex already exists inside of the Verticies list
-                throw new InvalidOperationException("Vertex already exists inside the Verticies list");
+            {
+                //This throws because 2 ifstatements hit and they both add the vertex to the verticies list
+                return false;
+    //           throw new InvalidOperationException("Vertex already exists inside the Verticies list");
             }
+
+            Count++;
             Vertices.Add(vertex);
+            return true;
         }
 
-        public void RemoveConnection(Vertex<TVertex, TEdge> firstVertex, Vertex<TVertex, TEdge> secondVertex, Edge<TVertex, TEdge> edge, Edge<TVertex, TEdge> edge1)
+        public void RemoveConnection(Vertex<TVertex, TEdge> firstVertex, Vertex<TVertex, TEdge> secondVertex)
         {
-            firstVertex.Edges.Remove(edge);
-            secondVertex.Edges.Remove(edge1);
-            Edges.Remove(edge);
-            Edges.Remove(edge1);
+            for (int i = 0; i < firstVertex.Edges.Count; i++)
+            {
+                if (firstVertex.Edges[i].secondVertex == secondVertex) 
+                 {
+                    Edges.Remove(firstVertex.Edges[i]);
+                    firstVertex.Edges.RemoveAt(i);
+                    i--;
+                }
+            }
+
+            for (int i = 0; i < secondVertex.Edges.Count; i++)
+            {
+                if (secondVertex.Edges[i].secondVertex == firstVertex)
+                {
+                    Edges.Remove(secondVertex.Edges[i]);
+                    secondVertex.Edges.RemoveAt(i);
+                    i--;
+                }
+            }
         }
 
         public void RemoveVertex(Vertex<TVertex, TEdge> vertex)
@@ -92,14 +109,14 @@ namespace TowerDefenseGameWillFinishThisOne
                 {
                     if (other.Edges[j].secondVertex == vertex)
                     {
-                        RemoveConnection(vertex, other, vertex.Edges[i], other.Edges[j]);
+                        RemoveConnection(vertex, other);
                         j--;
                         i--;
                         break;
                     }
                 }
             }
-
+            Count--;
             Vertices.Remove(vertex);
         }
 
@@ -119,7 +136,7 @@ namespace TowerDefenseGameWillFinishThisOne
         {
             for (int i = 0; i < Edges.Count; i++)
             {
-                if (Edges[i].firstVertex == edge.firstVertex && Edges[i].secondVertex == edge.secondVertex && Edges[i].Weight == edge.Weight)
+                if (Edges[i].firstVertex == edge.firstVertex && Edges[i].secondVertex == edge.secondVertex && Edges[i].Weight == edge.Weight && Edges[i].EdgeType.Equals(edge.EdgeType))
                 {
                     return true;
                 }
@@ -129,6 +146,7 @@ namespace TowerDefenseGameWillFinishThisOne
 
         public void AddVertex(TVertex value)
         {
+            Count++;
             Vertices.Add(new Vertex<TVertex, TEdge>(value));
         }
     }
