@@ -14,6 +14,8 @@ namespace TowerDefenseGameWillFinishThisOne
 {
     public class MakeMapScreen : Screen
     {
+        bool shouldDrawGridLines = true;
+
         Button MarkStartTile;
         Button MarkEndTile;
 
@@ -36,6 +38,8 @@ namespace TowerDefenseGameWillFinishThisOne
 
         //List<Tile> TilesList = new List<Tile>();
 
+        KeyboardState oldkeyboard;
+
         bool hasFinishedPlacing = true;
 
         ContentManager content;
@@ -57,17 +61,7 @@ namespace TowerDefenseGameWillFinishThisOne
             Eraser = new Button(Content.Load<Texture2D>("Eraser"), new Vector2((graphics.Viewport.Width + 2000) * Main.ScreenScale * Main.SpriteScales["Eraser"], 120 * Main.ScreenScale * Main.SpriteScales["Eraser"]), Color.White, new Vector2(Main.ScreenScale * Main.SpriteScales["Eraser"]), null);
 
             Texture2D backgroundBoxTexture = Content.Load<Texture2D>("BackgroundBox");
-
-            string[] roadPieces = { "RightUp", "LeftUp", "RightDown", "LeftDown" };
-            float buttonScale = backgroundBoxTexture.Width / 2 * Main.SpriteScales["BackgroundBox"];
-            var position = new Vector2(buttonScale, 200) * Main.ScreenScale;
-
-
-            foreach (var roadPiece in roadPieces)
-            {
-
-            }
-
+            
             var saveButtonTexture = Content.Load<Texture2D>("SaveButton");
             saveButton = new Button(saveButtonTexture, new Vector2(1200 * Main.SpriteScales["SaveButton"] * Main.ScreenScale, (saveButtonTexture.Width * Main.SpriteScales["SaveButton"]) / 2), Color.White, new Vector2(Main.SpriteScales["SaveButton"] * Main.ScreenScale), null);
 
@@ -142,13 +136,13 @@ namespace TowerDefenseGameWillFinishThisOne
         {
             Texture2D pixel = new Texture2D(graphics, 1, 1);
             pixel.SetData(new Color[] { Color.White });
-            
-            for (int i = TileWidth/2; i <= TilesArray.GetLength(0) * TileWidth; i += TileWidth)
+
+            for (int i = TileWidth / 2; i <= TilesArray.GetLength(0) * TileWidth; i += TileWidth)
             {
                 Line line = new Line(new Vector2(i, 0), new Vector2(i, graphics.Viewport.Height));
                 Extensions.DrawLine(spriteBatch, line, pixel, 1, Color.Red, true);
             }
-            for (int i = TileHeight/2; i <= TilesArray.GetLength(1) * TileHeight; i+= TileHeight)
+            for (int i = TileHeight / 2; i <= TilesArray.GetLength(1) * TileHeight; i += TileHeight)
             {
                 Line line = new Line(new Vector2(0, i), new Vector2(graphics.Viewport.Width, i));
                 Extensions.DrawLine(spriteBatch, line, pixel, 1, Color.Red, true);
@@ -226,12 +220,30 @@ namespace TowerDefenseGameWillFinishThisOne
             Tile neighborTile = null;
 
             (int x, int y) index = Index(tile);
-            Tile top = TilesArray[index.x, index.y-1];
+            Tile top = TilesArray[index.x, index.y - 1];
             Tile bottom = TilesArray[index.x, index.y + 1];
             Tile right = TilesArray[index.x + 1, index.y];
             Tile left = TilesArray[index.x - 1, index.y];
 
-            if(!(TilesArray[index.x, index.y] is null))
+            int neighborCount = 0;
+            if (!(top is null) && top.Connections.Contains(ConnectionTypes.Bottom))
+            {
+                neighborCount ++;
+            }
+            if (!(bottom is null) && bottom.Connections.Contains(ConnectionTypes.Top))
+            {
+                neighborCount ++;
+            }
+            if (!(right is null) && right.Connections.Contains(ConnectionTypes.Left))
+            {
+                neighborCount ++;
+            }
+            if (!(left is null) && left.Connections.Contains(ConnectionTypes.Right))
+            {
+                neighborCount ++;
+            }
+
+            if (!(TilesArray[index.x, index.y] is null))
             {
                 //a tile already exists here
                 Sprites.Remove(tile);
@@ -241,7 +253,7 @@ namespace TowerDefenseGameWillFinishThisOne
 
 
             //tile to the left of our left neighbor
-            if (!(left is null))
+            if (!(left is null) && hasFinishedPlacing == false)
             {
                 //This means the new tile is on the left of an existing tile
                 ConnectionTypes myConnectionType = ConnectionTypes.Left;
@@ -251,7 +263,7 @@ namespace TowerDefenseGameWillFinishThisOne
                 isTilePlacementValid |= checkAndPlaceTileIfValid(myConnectionType, neighborConnectionType);
             }
 
-            if (!(right is null))
+            if (!(right is null) && hasFinishedPlacing == false)
             {
                 //This means the new tile is on the right of an existing of tile
                 ConnectionTypes myConnectionType = ConnectionTypes.Right;
@@ -261,7 +273,7 @@ namespace TowerDefenseGameWillFinishThisOne
                 isTilePlacementValid |= checkAndPlaceTileIfValid(myConnectionType, neighborConnectionType);
             }
 
-            if (!(bottom is null))
+            if (!(bottom is null) && hasFinishedPlacing == false)
             {
                 //This means the new tile is below existing tile
                 ConnectionTypes myConnectionType = ConnectionTypes.Bottom;
@@ -271,7 +283,7 @@ namespace TowerDefenseGameWillFinishThisOne
                 isTilePlacementValid |= checkAndPlaceTileIfValid(myConnectionType, neighborConnectionType);
             }
 
-            if (!(top is null))
+            if (!(top is null) && hasFinishedPlacing == false)
             {
                 //This means the tile is on the top
                 ConnectionTypes myConnectionType = ConnectionTypes.Top;
@@ -287,6 +299,7 @@ namespace TowerDefenseGameWillFinishThisOne
                 hasFinishedPlacing = true;
                 return;
             }
+
 
             if (hasFinishedPlacing == false)
             {
@@ -310,6 +323,13 @@ namespace TowerDefenseGameWillFinishThisOne
                             var me = TilesGraph.FindVertex(v1);
                             var neighbor = TilesGraph.FindVertex(v2);
 
+                            if (neighbor.Value.IsEndingTile || neighbor.Value.IsStartingTile)
+                            {
+                                Sprites.Remove(tile);
+                                hasFinishedPlacing = true;
+                                return false;
+                            }
+
                             if (!(me is null))
                             {
                                 v1 = me;
@@ -317,7 +337,7 @@ namespace TowerDefenseGameWillFinishThisOne
 
                             foreach (var edge in neighbor.Edges)
                             {
-                                if(edge.EdgeType == neighborConnectionType)
+                                if (edge.EdgeType == neighborConnectionType)
                                 {
                                     //the connection already exists
                                     hasFinishedPlacing = true;
@@ -328,10 +348,12 @@ namespace TowerDefenseGameWillFinishThisOne
                             TilesGraph.AddVertex(v1);
                             TilesArray[Index(v1.Value).x, Index(v1.Value).y] = v1.Value;
                             TilesGraph.AddEdge(v1, neighbor, tile.Connections[j], neighborTile.Connections[k], 1);
-                            hasFinishedPlacing = true;
-                            return true;
 
-                        
+                            neighborCount--;
+
+                            hasFinishedPlacing = neighborCount == 0;
+                           
+                            return true;
                         }
                     }
                 }
@@ -347,7 +369,7 @@ namespace TowerDefenseGameWillFinishThisOne
                 {
                     if (vertex.Value.Connections.Length == 2)//This ifstatement is checking if this tile only has 2 connections if it only has two, then check for those specific two edges
                     {
-                        
+
                         if (vertex.Value.IsEndingTile == false && vertex.Value.IsStartingTile == false && vertex.Edges.Count < 2)
                         {
                             vertex.Value.Color = color;
@@ -384,7 +406,7 @@ namespace TowerDefenseGameWillFinishThisOne
                     }
                     if (TilesArray[i, j].IsClicked(Main.mouse) && !TilesArray[i, j].IsClicked(Main.oldMouse))
                     {
-                        if(TilesArray[i, j].IsStartingTile)
+                        if (TilesArray[i, j].IsStartingTile)
                         {
                             MarkStartTile.IsVisible = true;
                         }
@@ -406,6 +428,12 @@ namespace TowerDefenseGameWillFinishThisOne
         public override void Update(GameTime gameTime)
         {
             KeyboardState keyboard = Keyboard.GetState();
+
+            if (keyboard.IsKeyDown(Keys.G) && oldkeyboard.IsKeyUp(Keys.G))
+            {
+                shouldDrawGridLines = !shouldDrawGridLines;
+            }
+
 
             if (Eraser.IsClicked(Main.mouse) && !Eraser.IsClicked(Main.oldMouse))
             {
@@ -487,6 +515,8 @@ namespace TowerDefenseGameWillFinishThisOne
                 PlaceTile(newestTileToCreate);
             }
 
+            oldkeyboard = keyboard;
+
             base.Update(gameTime);
         }
 
@@ -515,7 +545,10 @@ namespace TowerDefenseGameWillFinishThisOne
 
         public override void Draw(SpriteBatch spriteBatch)
         {
-            DrawGridLines(spriteBatch, newestTileToCreate.HitBox.Width, newestTileToCreate.HitBox.Height);
+            if (shouldDrawGridLines)
+            {
+                DrawGridLines(spriteBatch, newestTileToCreate.HitBox.Width, newestTileToCreate.HitBox.Height);
+            }
             base.Draw(spriteBatch);
         }
     }

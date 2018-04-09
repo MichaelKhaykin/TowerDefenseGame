@@ -46,8 +46,8 @@ namespace TowerDefenseGameWillFinishThisOne
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            graphics.PreferredBackBufferWidth = widthOfCurrentScreen;
-            graphics.PreferredBackBufferHeight = heightOfCurrentScreen;
+            graphics.PreferredBackBufferWidth = widthOfCurrentScreen / 2;
+            graphics.PreferredBackBufferHeight = heightOfCurrentScreen / 2;
             graphics.ApplyChanges();
             IsMouseVisible = true;
             base.Initialize();
