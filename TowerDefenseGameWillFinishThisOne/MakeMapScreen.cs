@@ -161,7 +161,35 @@ namespace TowerDefenseGameWillFinishThisOne
             tile.Position = new Vector2((int)(Main.mouse.X / ((tile.ScaledWidth))) * ((tile.ScaledWidth)), (int)(Main.mouse.Y / ((tile.ScaledHeight))) * ((tile.ScaledHeight)));
 
             //If the tile is trying to be placed too close to the buttons, remove it from the list and return from function
+
             if (tile.Position.X < 200 * Main.ScreenScale)
+            {
+                tile.IsVisible = false;
+                if (Main.mouse.LeftButton == ButtonState.Released)
+                {
+                    hasFinishedPlacing = true;
+                    return;
+                }
+            }
+            else if (tile.Position.X > (graphics.Viewport.Width) * Main.ScreenScale)
+            {
+                tile.IsVisible = false;
+                if (Main.mouse.LeftButton == ButtonState.Released)
+                {
+                    hasFinishedPlacing = true;
+                    return;
+                }
+            }
+            else if (tile.Position.Y < (100) * Main.ScreenScale)
+            {
+                tile.IsVisible = false;
+                if (Main.mouse.LeftButton == ButtonState.Released)
+                {
+                    hasFinishedPlacing = true;
+                    return;
+                }
+            }
+            else if (tile.Position.Y > graphics.Viewport.Height * Main.ScreenScale)
             {
                 tile.IsVisible = false;
                 if (Main.mouse.LeftButton == ButtonState.Released)
@@ -428,11 +456,11 @@ namespace TowerDefenseGameWillFinishThisOne
                 }
             }
 
-            saveButton.IsVisible = TilesGraph.Vertices.Sum(v => v.Value.Connections.Count()) == TilesGraph.Edges.Count + 2;
+            saveButton.IsVisible = (TilesGraph.Vertices.Sum(v => v.Value.Connections.Count()) == TilesGraph.Edges.Count + 2) && (!MarkStartTile.IsVisible && !MarkEndTile.IsVisible);
 
             if (saveButton.IsClicked(Main.mouse) && !saveButton.IsClicked(Main.oldMouse))
             {
-                if (MarkStartTile == null && MarkEndTile == null)
+                if (!MarkStartTile.IsVisible && !MarkEndTile.IsVisible)
                 {
                     SaveMap();
                 }
