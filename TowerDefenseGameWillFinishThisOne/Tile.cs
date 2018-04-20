@@ -16,10 +16,12 @@ namespace TowerDefenseGameWillFinishThisOne
     {
         public bool IsStartingTile { get; set; }
         public bool IsEndingTile { get; set; }
-
+        
         public ConnectionTypes[] Connections { get; set; }
 
         public string Name { get; set; }
+
+        public Vector2 GridPosition { get; set; }
 
         [JsonIgnore]
         public override Texture2D Texture { get => base.Texture; set => base.Texture = value; }

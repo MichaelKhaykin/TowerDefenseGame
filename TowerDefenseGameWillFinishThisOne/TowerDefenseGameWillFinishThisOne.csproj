@@ -47,11 +47,13 @@
     <Compile Include="Enum.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Graph.cs" />
+    <Compile Include="Grid.cs" />
     <Compile Include="InvalidTilePlacementException.cs" />
     <Compile Include="Line.cs" />
     <Compile Include="Main.cs" />
     <Compile Include="GameScreen.cs" />
     <Compile Include="MakeMapScreen.cs" />
+    <Compile Include="Square.cs" />
     <Compile Include="Tile.cs" />
     <Compile Include="TileCreateInfo.cs" />
     <Compile Include="TileInfo.cs" />

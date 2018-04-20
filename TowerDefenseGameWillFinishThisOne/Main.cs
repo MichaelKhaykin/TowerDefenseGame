@@ -35,19 +35,18 @@ namespace TowerDefenseGameWillFinishThisOne
 
         Texture2D pixel;
 
-
-
         public Main()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
+
         }
 
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
-            graphics.PreferredBackBufferWidth = widthOfCurrentScreen / 2;
-            graphics.PreferredBackBufferHeight = heightOfCurrentScreen / 2;
+            graphics.PreferredBackBufferWidth = widthOfCurrentScreen;
+            graphics.PreferredBackBufferHeight = heightOfCurrentScreen ;
             graphics.ApplyChanges();
             IsMouseVisible = true;
             base.Initialize();
@@ -59,7 +58,6 @@ namespace TowerDefenseGameWillFinishThisOne
             spriteBatch = new SpriteBatch(GraphicsDevice);
 
             InitDictionary();
-
 
             //900 is the width of my screen and 1080 is the width of the texture (which is the backGround)
             
@@ -114,9 +112,9 @@ namespace TowerDefenseGameWillFinishThisOne
             SpriteScales.Add("LoadButton", 2f);
             SpriteScales.Add("MarkStartTile", 0.5f);
             SpriteScales.Add("MarkEndTile", 0.5f);
-            SpriteScales.Add("Towers/Tower1", 0.3f);
-            SpriteScales.Add("Towers/Tower2", 0.3f);
-            SpriteScales.Add("Towers/Tower3", 0.3f);
+            SpriteScales.Add("Towers/Tower1", 0.25f);
+            SpriteScales.Add("Towers/Tower2", 0.25f);
+            SpriteScales.Add("Towers/Tower3", 0.25f);
             SpriteScales.Add("Eraser", 0.3f);
         }
 

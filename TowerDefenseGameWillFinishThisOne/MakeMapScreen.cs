@@ -14,6 +14,9 @@ namespace TowerDefenseGameWillFinishThisOne
 {
     public class MakeMapScreen : Screen
     {
+        Grid grid;
+        //Hard coded number, this will depend on size of screen, need to figure this out later
+
         bool shouldDrawGridLines = true;
 
         Button MarkStartTile;
@@ -36,9 +39,15 @@ namespace TowerDefenseGameWillFinishThisOne
 
         GraphicsDevice graphics;
 
-        //List<Tile> TilesList = new List<Tile>();
+        int counter = 0;
 
         KeyboardState oldkeyboard;
+
+        Texture2D texture;
+
+        Rectangle RectAngleToDrawAt;
+
+        SpriteBatch spriteBatch;
 
         bool hasFinishedPlacing = true;
 
@@ -52,16 +61,22 @@ namespace TowerDefenseGameWillFinishThisOne
         TextLabel savedLabel;
         SpriteFont font;
 
+        Texture2D pixel;
+
         public MakeMapScreen(GraphicsDevice graphics, ContentManager content)
             : base(graphics, content)
         {
             this.graphics = graphics;
             this.content = content;
 
+            pixel = new Texture2D(graphics, 1, 1);
+            pixel.SetData(new Color[] { Color.White });
+
+
             Eraser = new Button(Content.Load<Texture2D>("Eraser"), new Vector2((graphics.Viewport.Width + 2000) * Main.ScreenScale * Main.SpriteScales["Eraser"], 120 * Main.ScreenScale * Main.SpriteScales["Eraser"]), Color.White, new Vector2(Main.ScreenScale * Main.SpriteScales["Eraser"]), null);
 
             Texture2D backgroundBoxTexture = Content.Load<Texture2D>("BackgroundBox");
-            
+
             var saveButtonTexture = Content.Load<Texture2D>("SaveButton");
             saveButton = new Button(saveButtonTexture, new Vector2(1200 * Main.SpriteScales["SaveButton"] * Main.ScreenScale, (saveButtonTexture.Width * Main.SpriteScales["SaveButton"]) / 2), Color.White, new Vector2(Main.SpriteScales["SaveButton"] * Main.ScreenScale), null);
 
@@ -95,8 +110,11 @@ namespace TowerDefenseGameWillFinishThisOne
 
             newestTileToCreate = new Tile(new TileInfo("RoadPieces/RightUpArcPiece", new Vector2(-10, -10), null), content, "RoadPieces/RightUpArcPiece");
 
-            //comebacktothis at 11;5
-            TilesArray = new Tile[(int)(graphics.Viewport.Width / newestTileToCreate.HitBox.Width), (int)(graphics.Viewport.Height / newestTileToCreate.HitBox.Height)];
+            //int nonDrawableTileMapMargin = 2;
+            //TilesArray = new Tile[(int)(graphics.Viewport.Width / newestTileToCreate.HitBox.Width) - nonDrawableTileMapMargin * 2, (int)(graphics.Viewport.Height / newestTileToCreate.HitBox.Height) - nonDrawableTileMapMargin * 2];
+            TilesArray = new Tile[15, 5];
+
+            grid = new Grid(75, 15, newestTileToCreate.HitBox.Width, newestTileToCreate.HitBox.Height, pixel);
 
             TileButtons.Add(topRightRoadPiece);
             TileButtons.Add(topLeftRoadPiece);
@@ -134,25 +152,35 @@ namespace TowerDefenseGameWillFinishThisOne
 
         private void DrawGridLines(SpriteBatch spriteBatch, int TileWidth, int TileHeight)
         {
-            Texture2D pixel = new Texture2D(graphics, 1, 1);
-            pixel.SetData(new Color[] { Color.White });
+            int nonDrawableTileMapMargin = 2;
+            Vector2 gridPosition = new Vector2(TileWidth, TileHeight) * (nonDrawableTileMapMargin + .5f);
 
-            for (int i = TileWidth / 2; i <= TilesArray.GetLength(0) * TileWidth; i += TileWidth)
+            //Vertical lines
+            for (int i = 0; i <= TilesArray.GetLength(0) * TileWidth; i += TileWidth)
             {
-                Line line = new Line(new Vector2(i, 0), new Vector2(i, graphics.Viewport.Height));
-                Extensions.DrawLine(spriteBatch, line, pixel, 1, Color.Red, true);
+                Line line = new Line(new Vector2(i, 0) + gridPosition, new Vector2(i, graphics.Viewport.Height - TileHeight * nonDrawableTileMapMargin * 2 - TileHeight / 2) + gridPosition);
+                Extensions.DrawLine(spriteBatch, line, pixel, 1, Color.Red, false);
             }
-            for (int i = TileHeight / 2; i <= TilesArray.GetLength(1) * TileHeight; i += TileHeight)
+
+            //Horizontal lines
+            for (int i = 0; i <= TilesArray.GetLength(1) * TileHeight; i += TileHeight)
             {
-                Line line = new Line(new Vector2(0, i), new Vector2(graphics.Viewport.Width, i));
-                Extensions.DrawLine(spriteBatch, line, pixel, 1, Color.Red, true);
+                Line line = new Line(new Vector2(0, i) + gridPosition, new Vector2(graphics.Viewport.Width - TileWidth * nonDrawableTileMapMargin * 2 - TileWidth / 2, i) + gridPosition);
+                Extensions.DrawLine(spriteBatch, line, pixel, 1, Color.Red, false);
             }
         }
 
         private void PlaceTile(Tile tile)
         {
             //cuz int math kewl
-            tile.Position = new Vector2((int)(Main.mouse.X / ((tile.ScaledWidth))) * ((tile.ScaledWidth)), (int)(Main.mouse.Y / ((tile.ScaledHeight))) * ((tile.ScaledHeight)));
+            //tile.Position = new Vector2((int)(Main.mouse.X / ((tile.ScaledWidth))) * ((tile.ScaledWidth)), (int)(Main.mouse.Y / ((tile.ScaledHeight))) * ((tile.ScaledHeight)));
+            for (int i = 0; i < grid.Squares.Length; i++)
+            {
+                if (grid.Squares[i].Contains(new Vector2(Main.mouse.X, Main.mouse.Y)))
+                {
+                    tile.Position = grid.Squares[i].Center;
+                }
+            }
 
             //If the tile is trying to be placed too close to the buttons, remove it from the list and return from function
 
@@ -174,7 +202,7 @@ namespace TowerDefenseGameWillFinishThisOne
                     return;
                 }
             }
-            else if (tile.Position.Y < (100) * Main.ScreenScale)
+            else if (tile.Position.Y < (200) * Main.ScreenScale)
             {
                 tile.IsVisible = false;
                 if (Main.mouse.LeftButton == ButtonState.Released)
@@ -202,8 +230,16 @@ namespace TowerDefenseGameWillFinishThisOne
             {
                 if (Main.mouse.LeftButton == ButtonState.Released && Main.oldMouse.LeftButton == ButtonState.Pressed)
                 {
-                    TilesGraph.AddVertex(tile);
-                    TilesArray[Index(tile).x, Index(tile).y] = tile;
+                    if (GridIndex(tile).row >= 0 && GridIndex(tile).col >= 0)
+                    {
+                        TilesGraph.AddVertex(tile);
+                        TilesArray[GridIndex(tile).row, GridIndex(tile).col] = tile;
+                        tile.GridPosition = new Vector2(GridIndex(tile).row, GridIndex(tile).col);
+                    }
+                    else
+                    {
+                        Sprites.Remove(tile);
+                    }
                     hasFinishedPlacing = true;
                 }
                 return;
@@ -219,31 +255,50 @@ namespace TowerDefenseGameWillFinishThisOne
             bool isTilePlacementValid = true;
             Tile neighborTile = null;
 
-            (int x, int y) index = Index(tile);
-            Tile top = TilesArray[index.x, index.y - 1];
-            Tile bottom = TilesArray[index.x, index.y + 1];
-            Tile right = TilesArray[index.x + 1, index.y];
-            Tile left = TilesArray[index.x - 1, index.y];
+            //(int x, int y) index = Index(tile);
+            (int row, int col) gridIndex = GridIndex(tile);
+
+            Tile top = null;
+            Tile bottom = null;
+            Tile right = null;
+            Tile left = null;
+
+            if (gridIndex.col - 1 >= 0)
+            {
+                top = TilesArray[gridIndex.row, gridIndex.col - 1];
+            }
+            if (gridIndex.col + 1 < TilesArray.GetLength(1))
+            {
+                bottom = TilesArray[gridIndex.row, gridIndex.col + 1];
+            }
+            if (gridIndex.row + 1 < TilesArray.GetLength(0))
+            {
+                right = TilesArray[gridIndex.row + 1, gridIndex.col];
+            }
+            if (gridIndex.row - 1 >= 0)
+            {
+                left = TilesArray[gridIndex.row - 1, gridIndex.col];
+            }
 
             int neighborCount = 0;
             if (!(top is null) && top.Connections.Contains(ConnectionTypes.Bottom))
             {
-                neighborCount ++;
+                neighborCount++;
             }
             if (!(bottom is null) && bottom.Connections.Contains(ConnectionTypes.Top))
             {
-                neighborCount ++;
+                neighborCount++;
             }
             if (!(right is null) && right.Connections.Contains(ConnectionTypes.Left))
             {
-                neighborCount ++;
+                neighborCount++;
             }
             if (!(left is null) && left.Connections.Contains(ConnectionTypes.Right))
             {
-                neighborCount ++;
+                neighborCount++;
             }
 
-            if (!(TilesArray[index.x, index.y] is null))
+            if (!(TilesArray[gridIndex.row, gridIndex.col] is null))
             {
                 //a tile already exists here
                 Sprites.Remove(tile);
@@ -346,13 +401,15 @@ namespace TowerDefenseGameWillFinishThisOne
                             }
 
                             TilesGraph.AddVertex(v1);
-                            TilesArray[Index(v1.Value).x, Index(v1.Value).y] = v1.Value;
+                            (int row, int col) thg = GridIndex(v1.Value);
+                            TilesArray[thg.row, thg.col] = v1.Value;
+                            v1.Value.GridPosition = new Vector2(GridIndex(v1.Value).row, GridIndex(v1.Value).col);
                             TilesGraph.AddEdge(v1, neighbor, tile.Connections[j], neighborTile.Connections[k], 1);
 
                             neighborCount--;
 
                             hasFinishedPlacing = neighborCount == 0;
-                           
+
                             return true;
                         }
                     }
@@ -429,6 +486,36 @@ namespace TowerDefenseGameWillFinishThisOne
         {
             KeyboardState keyboard = Keyboard.GetState();
 
+            counter = 0;
+            for (int i = 0; i < grid.Squares.Length; i++)
+            {
+                if (grid.Squares[i].Contains(new Vector2(Main.mouse.X, Main.mouse.Y)))
+                {
+                    counter++;
+
+                    //do something (Highlight inside of square)
+                    //Width - 1 and Height - 1, is to make sure the highlighted thingy doesn't overlap the lines of the square
+                    texture = new Texture2D(graphics, grid.Squares[i].Rectangle.Width - 1, grid.Squares[i].Rectangle.Height - 1);
+                    RectAngleToDrawAt = grid.Squares[i].Rectangle;
+
+                    Color[] data = new Color[texture.Width * texture.Height];
+
+                    texture.GetData(data);
+
+                    for (int j = 0; j < data.Length; j++)
+                    {
+                        data[j] = Color.LightSteelBlue;
+                    }
+
+                    texture.SetData(data);
+                }
+            }
+
+            if (counter == 0)
+            {
+                texture = null;
+            }
+
             if (keyboard.IsKeyDown(Keys.G) && oldkeyboard.IsKeyUp(Keys.G))
             {
                 shouldDrawGridLines = !shouldDrawGridLines;
@@ -500,10 +587,6 @@ namespace TowerDefenseGameWillFinishThisOne
                 {
                     var tileInfo = (TileCreateInfo)(TileButtons[i].Tag);
                     newestTileToCreate = new Tile(tileInfo, new Vector2(-10, -10), new Vector2(Main.SpriteScales[tileInfo.Texture.Name] * Main.ScreenScale), tileInfo.Texture.Name);
-                    //{
-                    //    Connections = tileInfo.Connections
-                    //};
-
                     Sprites.Add(newestTileToCreate);
 
                     hasFinishedPlacing = false;
@@ -532,6 +615,18 @@ namespace TowerDefenseGameWillFinishThisOne
             savedLabel.IsVisible = true;
         }
 
+        private (int row, int col) GridIndex(Tile tile)
+        {
+            for (int i = 0; i < grid.Squares.Length; i++)
+            {
+                if (grid.Squares[i].Contains(tile.Position))
+                {
+                    return (i % TilesArray.GetLength(0), i / TilesArray.GetLength(0));
+                }
+            }
+            return (-10, -10);
+        }
+
         private (int x, int y) Index(Tile tile)
         {
             return (Map((int)tile.Position.X, 0, graphics.Viewport.Width, 0, TilesArray.GetLength(0)), Map((int)tile.Position.Y, 0, graphics.Viewport.Height, 0, TilesArray.GetLength(1)));
@@ -545,9 +640,18 @@ namespace TowerDefenseGameWillFinishThisOne
 
         public override void Draw(SpriteBatch spriteBatch)
         {
+            this.spriteBatch = spriteBatch;
+
+            if (texture != null && RectAngleToDrawAt != null)
+            {
+                spriteBatch.Draw(texture, new Vector2(RectAngleToDrawAt.X, RectAngleToDrawAt.Y), Color.White);
+            }
+
             if (shouldDrawGridLines)
             {
-                DrawGridLines(spriteBatch, newestTileToCreate.HitBox.Width, newestTileToCreate.HitBox.Height);
+                grid.DrawGrid(spriteBatch);
+                //FoRNOW
+                // DrawGridLines(spriteBatch, newestTileToCreate.HitBox.Width, newestTileToCreate.HitBox.Height);
             }
             base.Draw(spriteBatch);
         }
