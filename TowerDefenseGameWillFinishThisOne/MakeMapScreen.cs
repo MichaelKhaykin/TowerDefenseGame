@@ -172,8 +172,6 @@ namespace TowerDefenseGameWillFinishThisOne
 
         private void PlaceTile(Tile tile)
         {
-            //cuz int math kewl
-            //tile.Position = new Vector2((int)(Main.mouse.X / ((tile.ScaledWidth))) * ((tile.ScaledWidth)), (int)(Main.mouse.Y / ((tile.ScaledHeight))) * ((tile.ScaledHeight)));
             for (int i = 0; i < grid.Squares.Length; i++)
             {
                 if (grid.Squares[i].Contains(new Vector2(Main.mouse.X, Main.mouse.Y)))
@@ -184,45 +182,18 @@ namespace TowerDefenseGameWillFinishThisOne
 
             //If the tile is trying to be placed too close to the buttons, remove it from the list and return from function
 
-            if (tile.Position.X < 200 * Main.ScreenScale)
+            if (grid.Bounds.Contains(new Point(Main.mouse.X, Main.mouse.Y)))
             {
-                tile.IsVisible = false;
-                if (Main.mouse.LeftButton == ButtonState.Released)
-                {
-                    hasFinishedPlacing = true;
-                    return;
-                }
-            }
-            else if (tile.Position.X > (graphics.Viewport.Width) * Main.ScreenScale)
-            {
-                tile.IsVisible = false;
-                if (Main.mouse.LeftButton == ButtonState.Released)
-                {
-                    hasFinishedPlacing = true;
-                    return;
-                }
-            }
-            else if (tile.Position.Y < (200) * Main.ScreenScale)
-            {
-                tile.IsVisible = false;
-                if (Main.mouse.LeftButton == ButtonState.Released)
-                {
-                    hasFinishedPlacing = true;
-                    return;
-                }
-            }
-            else if (tile.Position.Y > graphics.Viewport.Height * Main.ScreenScale)
-            {
-                tile.IsVisible = false;
-                if (Main.mouse.LeftButton == ButtonState.Released)
-                {
-                    hasFinishedPlacing = true;
-                    return;
-                }
+                tile.IsVisible = true;
             }
             else
             {
-                tile.IsVisible = true;
+                tile.IsVisible = false;
+                if (Main.mouse.LeftButton == ButtonState.Released)
+                {
+                    hasFinishedPlacing = true;
+                    return;
+                }
             }
 
             //There are no tiles are on the screen, so you are able to put the tile anywhere on the screen
@@ -424,21 +395,17 @@ namespace TowerDefenseGameWillFinishThisOne
             {
                 if (vertex.Value.IsClicked(Main.mouse) && !vertex.Value.IsClicked(Main.oldMouse))
                 {
-                    if (vertex.Value.Connections.Length == 2)//This ifstatement is checking if this tile only has 2 connections if it only has two, then check for those specific two edges
+                    int count = 0;
+                    for (int i = 0; i < vertex.Value.Connections.Length; i++)
                     {
-
-                        if (vertex.Value.IsEndingTile == false && vertex.Value.IsStartingTile == false && vertex.Edges.Count < 2)
+                        if (vertex.Value.Connections[i] == ConnectionTypes.Left || vertex.Value.Connections[i] == ConnectionTypes.Right)
                         {
-                            vertex.Value.Color = color;
-                            vertex.Value.IsStartingTile = isStart;
-                            vertex.Value.IsEndingTile = !isStart;
-                            isMarkingWhichTile = false;
-                            buttonToRemove.IsVisible = false;
+                            count++;
                         }
                     }
-                    else
+                    if (count == 2)
                     {
-                        if (vertex.Value.IsEndingTile == false && vertex.Value.IsStartingTile == false && vertex.Edges.Count < 5)
+                        if (vertex.Value.IsEndingTile == false && vertex.Value.IsStartingTile == false && vertex.Edges.Count < 2)
                         {
                             vertex.Value.Color = color;
                             vertex.Value.IsStartingTile = isStart;
@@ -493,9 +460,8 @@ namespace TowerDefenseGameWillFinishThisOne
                 {
                     counter++;
 
-                    //do something (Highlight inside of square)
                     //Width - 1 and Height - 1, is to make sure the highlighted thingy doesn't overlap the lines of the square
-                    texture = new Texture2D(graphics, grid.Squares[i].Rectangle.Width - 1, grid.Squares[i].Rectangle.Height - 1);
+                    texture = new Texture2D(graphics, grid.Squares[i].Rectangle.Width - 1, grid.Squares[i].Rectangle.Height + 1);
                     RectAngleToDrawAt = grid.Squares[i].Rectangle;
 
                     Color[] data = new Color[texture.Width * texture.Height];

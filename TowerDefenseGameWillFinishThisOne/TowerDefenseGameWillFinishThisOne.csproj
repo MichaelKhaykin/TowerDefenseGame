@@ -53,6 +53,9 @@
     <Compile Include="Main.cs" />
     <Compile Include="GameScreen.cs" />
     <Compile Include="MakeMapScreen.cs" />
+    <Compile Include="MinHeapTree.cs" />
+    <Compile Include="Pointy.cs" />
+    <Compile Include="Queue.cs" />
     <Compile Include="Square.cs" />
     <Compile Include="Tile.cs" />
     <Compile Include="TileCreateInfo.cs" />

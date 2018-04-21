@@ -25,4 +25,13 @@ namespace TowerDefenseGameWillFinishThisOne
         Left,
         Right
     }
+
+    public enum TroopMovingStates
+    {
+        CrossingTile,
+        AtEndOfTile
+    }
+
+
+
 }

@@ -9,12 +9,13 @@ using Microsoft.Xna.Framework.Graphics;
 
 namespace TowerDefenseGameWillFinishThisOne
 {
-    public class Enemy : Sprite
+    public class Enemy : AnimationSprite
     {
         public int Health { get; set; }
         public int Speed { get; set; }
 
-        public Enemy(Texture2D texture, Vector2 position, int health, int speed, bool isVisible, Color color, Vector2 scale, Texture2D pixel = null) : base(texture, position, color, scale, pixel)
+        public Enemy(Texture2D texture, Vector2 position, List<(TimeSpan timeSpan, Rectangle rect)> frames, int health, int speed, bool isVisible, Color color, Vector2 scale, Texture2D pixel = null) 
+            : base(texture, position, color, scale, frames, pixel)
         {
             Health = health;
             Speed = speed;

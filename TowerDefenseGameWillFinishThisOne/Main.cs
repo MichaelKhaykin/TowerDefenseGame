@@ -46,7 +46,7 @@ namespace TowerDefenseGameWillFinishThisOne
         {
             // TODO: Add your initialization logic here
             graphics.PreferredBackBufferWidth = widthOfCurrentScreen;
-            graphics.PreferredBackBufferHeight = heightOfCurrentScreen ;
+            graphics.PreferredBackBufferHeight = heightOfCurrentScreen;
             graphics.ApplyChanges();
             IsMouseVisible = true;
             base.Initialize();

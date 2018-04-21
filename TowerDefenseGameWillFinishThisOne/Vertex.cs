@@ -8,10 +8,16 @@ using System.Threading.Tasks;
 namespace TowerDefenseGameWillFinishThisOne
 {
     [JsonObject(IsReference = true)]
-    public class Vertex<TVertex, TEdge>
+    public class Vertex<TVertex, TEdge> : IComparable<Vertex<TVertex, TEdge>>
     {
         public List<Edge<TVertex, TEdge>> Edges = new List<Edge<TVertex, TEdge>>();
         public TVertex Value { get; set; }
+        public Pointy Point { get; set; }
+        public Vertex<TVertex, TEdge> Founder { get; set; } = null;
+        public double FScore { get; set; } = double.MaxValue;
+        public double GScore { get; set; } = double.MaxValue;
+        public bool hasBeenVisited = false;
+
 
         public Vertex(TVertex value)
         {
@@ -27,6 +33,16 @@ namespace TowerDefenseGameWillFinishThisOne
         public override int GetHashCode()
         {
             return base.GetHashCode();
+        }
+
+        public int CompareTo(Vertex<TVertex, TEdge> other)
+        {
+            //FOX THIS
+            if (FScore > other.FScore)
+            {
+                return 1;
+            }
+            return 0;
         }
 
         public static bool operator ==(Vertex<TVertex, TEdge> lhs, Vertex<TVertex, TEdge> rhs)

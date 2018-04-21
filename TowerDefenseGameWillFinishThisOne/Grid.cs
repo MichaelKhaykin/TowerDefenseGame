@@ -12,6 +12,7 @@ namespace TowerDefenseGameWillFinishThisOne
     public class Grid
     {
         public Square[] Squares { get; set; }
+        public Rectangle Bounds { get; set; }
 
         public Grid(int amountOfSquares, int modByNumber, int width, int height, Texture2D pixel)
         {
@@ -33,6 +34,8 @@ namespace TowerDefenseGameWillFinishThisOne
                 Squares[i] = new Square(new Rectangle(x, y, width, height), pixel);
                 x += width;
             }
+
+            Bounds = new Rectangle(Squares[0].Rectangle.X, Squares[0].Rectangle.Y, Squares[0].Rectangle.Width * modByNumber, Squares[0].Rectangle.Height * amountOfSquares / modByNumber);
         }
 
         public void DrawGrid(SpriteBatch spriteBatch)
@@ -42,6 +45,5 @@ namespace TowerDefenseGameWillFinishThisOne
                 Squares[i].Draw(spriteBatch);
             }
         }
-
     }
 }

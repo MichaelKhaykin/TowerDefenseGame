@@ -149,5 +149,84 @@ namespace TowerDefenseGameWillFinishThisOne
             Count++;
             Vertices.Add(new Vertex<TVertex, TEdge>(value));
         }
+
+        public Stack<Vertex<TVertex, TEdge>> AStar(Vertex<TVertex, TEdge> startingVertex, Vertex<TVertex, TEdge> endingVertex)
+        {
+            if (startingVertex == null || endingVertex == null)
+            {
+                return null;
+            }
+            //setup
+            //  set FSCORE, GSCORE, to infinity and FOUNDER TO NULL
+            // set the GSCORE of start to 0, the FSCORE of start to Hueristic(start, end)
+            for (int i = 0; i < Vertices.Count; i++)
+            {
+                Vertices[i].FScore = double.PositiveInfinity;
+                Vertices[i].GScore = double.PositiveInfinity;
+                Vertices[i].Founder = null;
+            }
+
+            startingVertex.GScore = 0;
+            startingVertex.FScore = Euclodiean(startingVertex, endingVertex);
+
+
+            //astar
+            MinHeapTree<Vertex<TVertex, TEdge>> queue = new MinHeapTree<Vertex<TVertex, TEdge>>();
+
+            queue.Add(startingVertex);
+            while (queue.Count != 0)
+            {
+                var current = queue.Pop();
+
+                if (current == endingVertex)
+                {
+                    break;
+                }
+
+                current.hasBeenVisited = true;
+
+                //generate 
+                for (int i = 0; i < Edges.Count; i++)
+                {
+                    if (Edges[i].firstVertex == current)
+                    {
+                        var friend = Edges[i].secondVertex;
+                        if (friend.hasBeenVisited)
+                        {
+                            continue;
+                        }
+
+                        var tempGSCORE = current.GScore + Edges[i].Weight;
+                        if (tempGSCORE < friend.GScore)
+                        {
+                            friend.Founder = current;
+                            friend.GScore = tempGSCORE;
+                            friend.FScore = friend.GScore + Euclodiean(friend, endingVertex);
+                        }
+
+                        if (!queue.Contains(friend))
+                        {
+                            queue.Add(friend);
+                        }
+                    }
+                }
+            }
+            //construct path
+            Stack<Vertex<TVertex, TEdge>> founders = new Stack<Vertex<TVertex, TEdge>>();
+
+            founders.Push(endingVertex);
+            while (founders.Peek() != startingVertex)
+            {
+                founders.Push(founders.Peek().Founder);
+            }
+            return founders;
+        }
+
+        private double Euclodiean(Vertex<TVertex, TEdge> startingVertex, Vertex<TVertex, TEdge> endingVertex)
+        {
+            double X = endingVertex.Point.X - startingVertex.Point.X;
+            double Y = endingVertex.Point.Y - startingVertex.Point.Y;
+            return Math.Sqrt(X * X + Y * Y);
+        }
     }
 }
