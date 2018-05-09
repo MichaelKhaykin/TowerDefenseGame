@@ -10,6 +10,27 @@ namespace TowerDefenseGameWillFinishThisOne
 {
     public static class Extensions
     {
+        public static Vector2 TranslateToOrigin(this Vector2 vectorToTranslate, Vector2 origin)
+         => vectorToTranslate - origin;
+
+        public static Vector2 TranslateFromOrigin(this Vector2 vectorToTranslate, Vector2 origin)
+         => vectorToTranslate + origin;
+
+        public static float ToAngle(this Vector2 vector)
+         => (float)Math.Atan2(-vector.Y, vector.X);
+
+        public static Vector2 ToVector(this float floatToBeVector)
+           => new Vector2((float)Math.Cos(floatToBeVector), (float)-Math.Sin(floatToBeVector));
+
+        public static Vector2 ToVector(this float floatToBeVector, float radius)
+            => floatToBeVector.ToVector() * radius;
+
+        public static Vector2 ToVector(this Angle angle)
+         => new Vector2((float)Math.Cos(angle.value), -(float)Math.Sin(angle.value));
+
+        public static Vector2 ToVector(this Angle angle, float radius)
+         => angle.ToVector() * radius;
+
         public static void DrawLine(this SpriteBatch spriteBatch, Line line, Texture2D pixel, float width, Color color, bool drawEndPoints = false)
         {
             var scale = new Vector2(line.Length, width);

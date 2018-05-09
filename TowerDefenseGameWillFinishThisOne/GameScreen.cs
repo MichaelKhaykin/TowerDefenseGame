@@ -35,12 +35,13 @@ namespace TowerDefenseGameWillFinishThisOne
         Vector2 positionToMoveTo;
         float travelPercentage;
 
-        
+
         Grid grid;
 
         int counter = 0;
 
         Vertex<Tile, ConnectionTypes> current;
+        Vertex<Tile, ConnectionTypes> prev;
 
         List<(TimeSpan timeSpan, Rectangle rect)> frames = new List<(TimeSpan timeSpan, Rectangle rect)>();
 
@@ -53,6 +54,10 @@ namespace TowerDefenseGameWillFinishThisOne
         Texture2D pixel1;
 
         Tile[,] TilesArray;
+
+        bool isStraightPeice = true;
+
+        Vector2 oldPos = new Vector2(0, 0);
 
         Tile tempTile;
 
@@ -127,6 +132,28 @@ namespace TowerDefenseGameWillFinishThisOne
             frames.Add((t, new Rectangle(1014, 650, 465, 645)));
         }
 
+        private Vector2 Turn(Vector2 origin, Vector2 start, Vector2 end, float radius, float travelPercent)
+        {
+            Angle startAngle = start.TranslateToOrigin(origin).ToAngle();
+            Angle endAngle = end.TranslateToOrigin(origin).ToAngle();
+
+            //Calculate fastest path
+            var angle = endAngle - startAngle;
+            //if angle is greater than 180 there's obviously a faster way
+            if (angle > Math.PI)
+            {
+                //Get different angle for faster path
+                angle = startAngle - endAngle;
+                //Get angle to be a non negative number that represents the same thing (as in it will be the same getting the cos or sin of it)
+                angle += (float)Math.PI;
+            }
+
+            angle *= travelPercent;
+            angle += startAngle;
+
+            return angle.ToVector(radius).TranslateFromOrigin(origin);
+        }
+
         private void DrawGridLines(SpriteBatch spriteBatch, int TileWidth, int TileHeight)
         {
             Texture2D pixel = new Texture2D(graphics, 1, 1);
@@ -161,68 +188,101 @@ namespace TowerDefenseGameWillFinishThisOne
                 hasFinishedPlacingTower = true;
             }
         }
-        
+
         public override void Update(GameTime gameTime)
         {
             elpasedTimeToCross += gameTime.ElapsedGameTime;
-
+            if (troop != null)
+            {
+                oldPos = troop.Position;
+            }
             switch (troopMovingStates)
             {
                 case TroopMovingStates.CrossingTile:
                     //  troop.Position = new Vector2((float)current.Point.X, (float)current.Point.Y + 50);
 
                     //float count = (positionToMoveTo.X - initTroopPosition) 
+                    
 
-                    travelPercentage += 0.01f;
-
-                    bool isStraightPiece = (initTroopPosition.X == positionToMoveTo.X) || (initTroopPosition.Y == positionToMoveTo.Y);
-                    if (isStraightPiece)
+                    (int x, int y) Curr = (-1, -1);
+                    (int x, int y) Next = (-1, -1);
+                    (int x, int y) Prev = (-1, -1);
+                    if (path.Count > 0)
                     {
+                        Curr = GridIndex(current.Value);
+                        Next = GridIndex(path.Peek().Value);
+                    }
+                    if (Next.x >= 0 && Next.y >= 0 && Curr.x >= 0 && Curr.y >= 0)
+                    {
+                        TilesArray[Next.x, Next.y].Color = Color.Blue;
+                        TilesArray[Curr.x, Curr.y].Color = Color.Orange;
+                    }
+                    if (!(prev is null))
+                    {
+                        Prev = GridIndex(prev.Value);
+
+                        TilesArray[Prev.x, Prev.y].Color = Color.Black;
+
+                        //Not straight pei  ce
+                        if ((Prev.y != Next.y) && (Prev.x != Next.x))
+                        {
+                            if (Next.x >= 0 && Next.y >= 0)
+                            {
+                                isStraightPeice = false;
+                            }
+                        }
+                        else
+                        {
+                            isStraightPeice = true;
+                        }
+                    }
+                    //troop.Position = new Vector2(MathHelper.Lerp(initTroopPosition.X, positionToMoveTo.X, travelPercentage), MathHelper.Lerp(initTroopPosition.Y, positionToMoveTo.Y, travelPercentage));
+                    if (isStraightPeice)
+                    {
+                        travelPercentage += 0.01f;
                         troop.Position = new Vector2(MathHelper.Lerp(initTroopPosition.X, positionToMoveTo.X, travelPercentage), MathHelper.Lerp(initTroopPosition.Y, positionToMoveTo.Y, travelPercentage));
                     }
                     else
                     {
-                        if (positionToMoveTo.X > initTroopPosition.X && positionToMoveTo.Y < initTroopPosition.Y)
+                        travelPercentage += 0.005f;
+                        if (Next.x >= 0 && Next.y >= 0 && Curr.x >= 0 && Curr.y >= 0)
                         {
-                            //Going to the right up
-                            float angle = MathHelper.Lerp(MathHelper.Pi, 3 * MathHelper.PiOver2, travelPercentage);
-                            troop.Position = new Vector2((float)(Math.Cos(angle) * tempTile.ScaledWidth / 2 + positionToMoveTo.X), (float)(Math.Sin(angle) * tempTile.ScaledHeight / 2 + initTroopPosition.Y));
-
-                        }
-                        else if (positionToMoveTo.X < initTroopPosition.X && positionToMoveTo.Y < initTroopPosition.Y)
-                        {
-                            //Going to the right down
-                            float angle = MathHelper.Lerp(MathHelper.Pi, MathHelper.PiOver2, travelPercentage);
-                            troop.Position = new Vector2((float)(Math.Cos(angle) * tempTile.ScaledWidth / 2 + positionToMoveTo.X), (float)(Math.Sin(angle) * tempTile.ScaledHeight / 2 + initTroopPosition.Y));
-                        }
-                        else if (positionToMoveTo.X < initTroopPosition.X && positionToMoveTo.Y < initTroopPosition.Y)
-                        {
-                            //Going to the left up
-                            //float angle = MathHelper.Lerp(MathHelper.Pi, 3 * MathHelper.PiOver2, travelPercentage);
-                            //troop.Position = new Vector2((float)(Math.Cos(angle) * tempTile.ScaledWidth / 2 + positionToMoveTo.X), (float)(Math.Sin(angle) * tempTile.ScaledHeight / 2 + initTroopPosition.Y));
-
-                        }
-                        else if (positionToMoveTo.X < initTroopPosition.X && positionToMoveTo.Y > initTroopPosition.Y)
-                        {
-                            //float angle = MathHelper.Lerp(MathHelper.Pi, 3 * MathHelper.PiOver2, travelPercentage);
-                            //troop.Position = new Vector2((float)(Math.Cos(angle) * tempTile.ScaledWidth / 2 + positionToMoveTo.X), (float)(Math.Sin(angle) * tempTile.ScaledHeight / 2 + initTroopPosition.Y));
-
-                            //Going to the left down
-
+                            var origin = Vector2.Zero;
+                            if (Curr.y == Prev.y)
+                            {
+                                origin = new Vector2(TilesArray[Prev.x, Prev.y].X, TilesArray[Next.x, Next.y].Y);
+                            }
+                            else
+                            {
+                                origin = new Vector2(TilesArray[Next.x, Next.y].X, TilesArray[Prev.x, Prev.y].Y);
+                            }
+                            troop.Position = Turn(origin, TilesArray[Prev.x, Prev.y].Position, TilesArray[Next.x, Next.y].Position, 71f, travelPercentage);
                         }
                     }
 
                     if (travelPercentage >= 1f)
                     {
                         troopMovingStates = TroopMovingStates.AtEndOfTile;
-                        troop.Position = positionToMoveTo;
+                        if (isStraightPeice)
+                        {
+                            troop.Position = positionToMoveTo;
+                        }
+                        else
+                        {
+                            positionToMoveTo = TilesArray[Next.x, Next.y].Position;
+                        }
                     }
 
-                 break;
+                    break;
 
                 case TroopMovingStates.AtEndOfTile:
                     if (path != null && path.Count != 0)
                     {
+                        if (!(current is null))
+                        {
+                            prev = current;
+                        }
+
                         current = path.Pop();
                         initTroopPosition = troop.Position;
 
@@ -238,6 +298,32 @@ namespace TowerDefenseGameWillFinishThisOne
                         troopMovingStates = TroopMovingStates.CrossingTile;
                     }
                     break;
+            }
+
+            if (path != null && path.Count == 0)
+            {
+                //endingVertex will not be null if we already have apath so dont need to check for that
+                if (troop.SpriteEffects == SpriteEffects.None)
+                {
+                    troop.Position += new Vector2(1, 0);
+                }
+                else
+                {
+                    troop.Position -= new Vector2(1, 0);
+                }
+
+                for (int i = 0; i < grid.Squares.Length; i++)
+                {
+                    if (grid.Squares[i].Contains(troop.Position))
+                    {
+                        int x = i % TilesArray.GetLength(0);
+                        int y = i / TilesArray.GetLength(0);
+                        if (TilesArray[x, y] is null)
+                        {
+                            Sprites.Remove(troop);
+                        }
+                    }
+                }
             }
 
             KeyboardState keyboard = Keyboard.GetState();
@@ -317,9 +403,13 @@ namespace TowerDefenseGameWillFinishThisOne
                     Sprites.Add(troop);
 
                     path = MakeMapScreen.TilesGraph.AStar(startingVertex, endingVertex);
+
                 }
             }
-
+            if (troop != null)
+            {
+                troop.SpriteEffects = oldPos.X <= troop.Position.X ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
+            }
             foreach (var towerbutton in TowerButtons)
             {
                 if (towerbutton.IsClicked(Main.mouse) && !towerbutton.IsClicked(Main.oldMouse))
@@ -342,20 +432,20 @@ namespace TowerDefenseGameWillFinishThisOne
             base.Update(gameTime);
         }
 
-        private (int x, int y) Index(Tile tile)
+        private (int row, int col) GridIndex(Tile tile)
         {
-            return (Map((int)tile.Position.X, 0, graphics.Viewport.Width, 0, TilesArray.GetLength(0)), Map((int)tile.Position.Y, 0, graphics.Viewport.Height, 0, TilesArray.GetLength(1)));
-            //return ((int)(graphics.Viewport.Width / tile.Position.X), (int)(graphics.Viewport.Height / tile.Position.Y));
-        }
-
-        private int Map(int x, int in_min, int in_max, int out_min, int out_max)
-        {
-            return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+            for (int i = 0; i < grid.Squares.Length; i++)
+            {
+                if (grid.Squares[i].Contains(tile.Position))
+                {
+                    return (i % TilesArray.GetLength(0), i / TilesArray.GetLength(0));
+                }
+            }
+            return (-10, -10);
         }
 
         public override void Draw(SpriteBatch spriteBatch)
         {
-
             if (shouldDrawGridLines)
             {
                 if (texture != null && RectAngleToDrawAt != null)
@@ -371,8 +461,6 @@ namespace TowerDefenseGameWillFinishThisOne
                 spriteBatch.Draw(pixel1, temprect, Color.Yellow);
                 spriteBatch.Draw(pixel1, temprect1, Color.Yellow);
             }
-
-
         }
     }
 }

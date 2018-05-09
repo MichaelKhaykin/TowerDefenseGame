@@ -592,18 +592,6 @@ namespace TowerDefenseGameWillFinishThisOne
             }
             return (-10, -10);
         }
-
-        private (int x, int y) Index(Tile tile)
-        {
-            return (Map((int)tile.Position.X, 0, graphics.Viewport.Width, 0, TilesArray.GetLength(0)), Map((int)tile.Position.Y, 0, graphics.Viewport.Height, 0, TilesArray.GetLength(1)));
-            //return ((int)(graphics.Viewport.Width / tile.Position.X), (int)(graphics.Viewport.Height / tile.Position.Y));
-        }
-
-        private int Map(int x, int in_min, int in_max, int out_min, int out_max)
-        {
-            return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-        }
-
         public override void Draw(SpriteBatch spriteBatch)
         {
             this.spriteBatch = spriteBatch;
