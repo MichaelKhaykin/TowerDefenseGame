@@ -13,6 +13,18 @@ namespace TowerDefenseGameWillFinishThisOne
     {
         public int Health { get; set; }
         public int Speed { get; set; }
+        public Vector2 OldPos { get; set; }
+
+        public Stack<Vertex<Tile, ConnectionTypes>> Path = null;
+
+        public Vertex<Tile, ConnectionTypes> CurrentTile { get; set; }
+        public Vertex<Tile, ConnectionTypes> PreviousTile { get; set; }
+
+        public Vector2 CurrentStartPoint { get; set; }
+        public Vector2 CurrentEndPoint { get; set; }
+
+        public float TravelPercentage { get; set; } = 0f;
+        public int CurrentPointIndex { get; set; } = 0;
 
         public Enemy(Texture2D texture, Vector2 position, List<(TimeSpan timeSpan, Rectangle rect)> frames, int health, int speed, bool isVisible, Color color, Vector2 scale, Texture2D pixel = null) 
             : base(texture, position, color, scale, frames, pixel)

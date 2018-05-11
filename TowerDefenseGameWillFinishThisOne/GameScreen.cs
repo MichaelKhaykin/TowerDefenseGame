@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -14,9 +15,6 @@ namespace TowerDefenseGameWillFinishThisOne
 {
     public class GameScreen : Screen
     {
-        Rectangle temprect;
-        Rectangle temprect1;
-
         bool shouldDrawGridLines = true;
 
         Vertex<Tile, ConnectionTypes> startingVertex;
@@ -29,35 +27,21 @@ namespace TowerDefenseGameWillFinishThisOne
         TimeSpan elpasedTimeToCross = new TimeSpan();
 
         //List<Enemy> Troops = new List<Enemy>();
-        Enemy troop;
-
-        Vector2 initTroopPosition;
-        Vector2 positionToMoveTo;
-        float travelPercentage;
-
+        List<Enemy> troops = new List<Enemy>();
 
         Grid grid;
 
         int counter = 0;
 
-        Vertex<Tile, ConnectionTypes> current;
-        Vertex<Tile, ConnectionTypes> prev;
-
         List<(TimeSpan timeSpan, Rectangle rect)> frames = new List<(TimeSpan timeSpan, Rectangle rect)>();
 
+        Stopwatch timeForSpawningNewEnemy = new Stopwatch();
+
         Tower temp;
-
-        TroopMovingStates troopMovingStates = TroopMovingStates.AtEndOfTile;
-
-        Stack<Vertex<Tile, ConnectionTypes>> path = null;//= new Stack<Vertex<Tile, ConnectionTypes>>();
 
         Texture2D pixel1;
 
         Tile[,] TilesArray;
-
-        bool isStraightPeice = true;
-
-        Vector2 oldPos = new Vector2(0, 0);
 
         Tile tempTile;
 
@@ -120,6 +104,8 @@ namespace TowerDefenseGameWillFinishThisOne
             Sprites.Add((BaseSprite)tower1.Tag);
             Sprites.Add((BaseSprite)tower2.Tag);
             Sprites.Add((BaseSprite)tower3.Tag);
+
+
         }
 
         private void SetUpFrames()
@@ -192,140 +178,18 @@ namespace TowerDefenseGameWillFinishThisOne
         public override void Update(GameTime gameTime)
         {
             elpasedTimeToCross += gameTime.ElapsedGameTime;
-            if (troop != null)
+            for (int i = 0; i < troops.Count; i++)
             {
-                oldPos = troop.Position;
-            }
-            switch (troopMovingStates)
-            {
-                case TroopMovingStates.CrossingTile:
-                    //  troop.Position = new Vector2((float)current.Point.X, (float)current.Point.Y + 50);
-
-                    //float count = (positionToMoveTo.X - initTroopPosition) 
-                    
-
-                    (int x, int y) Curr = (-1, -1);
-                    (int x, int y) Next = (-1, -1);
-                    (int x, int y) Prev = (-1, -1);
-                    if (path.Count > 0)
-                    {
-                        Curr = GridIndex(current.Value);
-                        Next = GridIndex(path.Peek().Value);
-                    }
-                    if (Next.x >= 0 && Next.y >= 0 && Curr.x >= 0 && Curr.y >= 0)
-                    {
-                        TilesArray[Next.x, Next.y].Color = Color.Blue;
-                        TilesArray[Curr.x, Curr.y].Color = Color.Orange;
-                    }
-                    if (!(prev is null))
-                    {
-                        Prev = GridIndex(prev.Value);
-
-                        TilesArray[Prev.x, Prev.y].Color = Color.Black;
-
-                        //Not straight pei  ce
-                        if ((Prev.y != Next.y) && (Prev.x != Next.x))
-                        {
-                            if (Next.x >= 0 && Next.y >= 0)
-                            {
-                                isStraightPeice = false;
-                            }
-                        }
-                        else
-                        {
-                            isStraightPeice = true;
-                        }
-                    }
-                    //troop.Position = new Vector2(MathHelper.Lerp(initTroopPosition.X, positionToMoveTo.X, travelPercentage), MathHelper.Lerp(initTroopPosition.Y, positionToMoveTo.Y, travelPercentage));
-                    if (isStraightPeice)
-                    {
-                        travelPercentage += 0.01f;
-                        troop.Position = new Vector2(MathHelper.Lerp(initTroopPosition.X, positionToMoveTo.X, travelPercentage), MathHelper.Lerp(initTroopPosition.Y, positionToMoveTo.Y, travelPercentage));
-                    }
-                    else
-                    {
-                        travelPercentage += 0.005f;
-                        if (Next.x >= 0 && Next.y >= 0 && Curr.x >= 0 && Curr.y >= 0)
-                        {
-                            var origin = Vector2.Zero;
-                            if (Curr.y == Prev.y)
-                            {
-                                origin = new Vector2(TilesArray[Prev.x, Prev.y].X, TilesArray[Next.x, Next.y].Y);
-                            }
-                            else
-                            {
-                                origin = new Vector2(TilesArray[Next.x, Next.y].X, TilesArray[Prev.x, Prev.y].Y);
-                            }
-                            troop.Position = Turn(origin, TilesArray[Prev.x, Prev.y].Position, TilesArray[Next.x, Next.y].Position, 71f, travelPercentage);
-                        }
-                    }
-
-                    if (travelPercentage >= 1f)
-                    {
-                        troopMovingStates = TroopMovingStates.AtEndOfTile;
-                        if (isStraightPeice)
-                        {
-                            troop.Position = positionToMoveTo;
-                        }
-                        else
-                        {
-                            positionToMoveTo = TilesArray[Next.x, Next.y].Position;
-                        }
-                    }
-
-                    break;
-
-                case TroopMovingStates.AtEndOfTile:
-                    if (path != null && path.Count != 0)
-                    {
-                        if (!(current is null))
-                        {
-                            prev = current;
-                        }
-
-                        current = path.Pop();
-                        initTroopPosition = troop.Position;
-
-                        temprect = new Rectangle((int)initTroopPosition.X, (int)initTroopPosition.Y, 10, 10);
-
-                        travelPercentage = 0;
-
-                        //float amountToMove = current.Value.X + current.Value.ScaledWidth - current.Value.X;
-                        positionToMoveTo = current.Value.Position;
-
-                        temprect1 = new Rectangle((int)positionToMoveTo.X, (int)positionToMoveTo.Y, 10, 10);
-
-                        troopMovingStates = TroopMovingStates.CrossingTile;
-                    }
-                    break;
-            }
-
-            if (path != null && path.Count == 0)
-            {
-                //endingVertex will not be null if we already have apath so dont need to check for that
-                if (troop.SpriteEffects == SpriteEffects.None)
+                if (troops[i] != null)
                 {
-                    troop.Position += new Vector2(1, 0);
-                }
-                else
-                {
-                    troop.Position -= new Vector2(1, 0);
+                    troops[i].OldPos = troops[i].Position;
                 }
 
-                for (int i = 0; i < grid.Squares.Length; i++)
+                if (troops[i] != null)
                 {
-                    if (grid.Squares[i].Contains(troop.Position))
-                    {
-                        int x = i % TilesArray.GetLength(0);
-                        int y = i / TilesArray.GetLength(0);
-                        if (TilesArray[x, y] is null)
-                        {
-                            Sprites.Remove(troop);
-                        }
-                    }
+                    MoveAcrossTile(troops[i]);
                 }
             }
-
             KeyboardState keyboard = Keyboard.GetState();
 
             counter = 0;
@@ -364,8 +228,8 @@ namespace TowerDefenseGameWillFinishThisOne
 
             if (LoadButton.IsClicked(Main.mouse) && !LoadButton.IsClicked(Main.oldMouse))
             {
-                Sprites.Remove(LoadButton);
-
+                LoadButton.IsVisible = false;
+           
                 var serializedInfo = System.IO.File.ReadAllText("NamesAndPositions.json");
                 MakeMapScreen.TilesGraph = JsonConvert.DeserializeObject<Graph<Tile, ConnectionTypes>>(serializedInfo);
 
@@ -381,6 +245,10 @@ namespace TowerDefenseGameWillFinishThisOne
                     }
 
                     vertex.Value.Texture = contentManager.Load<Texture2D>(vertex.Value.Name);
+
+                    string jPath = "Paths/" + vertex.Value.Name + ".json";
+                    vertex.Value.PathPositions = JsonConvert.DeserializeObject<List<Vector2>>(System.IO.File.ReadAllText(jPath));
+
                     (int x, int y) = ((int)vertex.Value.GridPosition.X, (int)vertex.Value.GridPosition.Y);
                     TilesArray[x, y] = vertex.Value;
                     vertex.Value.Scale = new Vector2(Main.ScreenScale * Main.SpriteScales[vertex.Value.Name]);
@@ -399,16 +267,43 @@ namespace TowerDefenseGameWillFinishThisOne
 
                 if (startingVertex != null && endingVertex != null)
                 {
-                    troop = new Enemy(Content.Load<Texture2D>("sprites"), new Vector2(startingVertex.Value.Position.X - startingVertex.Value.ScaledWidth, startingVertex.Value.Position.Y), frames, 100, 1, true, Color.White, new Vector2(0.05f));
-                    Sprites.Add(troop);
+                    var enemy = new Enemy(Content.Load<Texture2D>("sprites"), new Vector2(startingVertex.Value.Position.X - startingVertex.Value.ScaledWidth / 2, startingVertex.Value.Position.Y), frames, 100, 1, true, Color.White, new Vector2(0.05f));
+                    enemy.Path = MakeMapScreen.TilesGraph.AStar(startingVertex, endingVertex);
+                    enemy.PreviousTile = enemy.Path.Peek();
+                    enemy.CurrentTile = enemy.Path.Peek();
+                    enemy.CurrentPointIndex = 1;
+                    enemy.CurrentStartPoint = enemy.CurrentTile.Value.PathPositions[0] + enemy.Path.Peek().Value.Position;
+                    enemy.CurrentEndPoint = enemy.CurrentTile.Value.PathPositions[1] + enemy.Path.Peek().Value.Position;
 
-                    path = MakeMapScreen.TilesGraph.AStar(startingVertex, endingVertex);
+                    troops.Add(enemy);
+                    Sprites.Add(enemy);
 
+                    timeForSpawningNewEnemy.Start();
                 }
             }
-            if (troop != null)
+
+            if(timeForSpawningNewEnemy.ElapsedMilliseconds > 3000)
             {
-                troop.SpriteEffects = oldPos.X <= troop.Position.X ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
+                var enemy = new Enemy(Content.Load<Texture2D>("sprites"), new Vector2(startingVertex.Value.Position.X - startingVertex.Value.ScaledWidth / 2, startingVertex.Value.Position.Y), frames, 100, 1, true, Color.White, new Vector2(0.05f));
+                enemy.Path = MakeMapScreen.TilesGraph.AStar(startingVertex, endingVertex);
+                enemy.PreviousTile = enemy.Path.Peek();
+                enemy.CurrentTile = enemy.Path.Peek();
+                enemy.CurrentPointIndex = 1;
+                enemy.CurrentStartPoint = enemy.CurrentTile.Value.PathPositions[0] + enemy.Path.Peek().Value.Position;
+                enemy.CurrentEndPoint = enemy.CurrentTile.Value.PathPositions[1] + enemy.Path.Peek().Value.Position;
+
+                troops.Add(enemy);
+                Sprites.Add(enemy);
+
+                timeForSpawningNewEnemy.Restart();
+            }
+
+            if (troops.Count > 0)
+            {
+                for (int i = 0; i < troops.Count; i++)
+                {
+                    troops[i].SpriteEffects = troops[i].OldPos.X <= troops[i].Position.X ? SpriteEffects.None : SpriteEffects.FlipHorizontally;
+                }
             }
             foreach (var towerbutton in TowerButtons)
             {
@@ -430,6 +325,47 @@ namespace TowerDefenseGameWillFinishThisOne
             oldkeyboard = keyboard;
 
             base.Update(gameTime);
+        }
+
+        private void MoveAcrossTile(Enemy enemy)
+        {
+                enemy.TravelPercentage += 0.01f * enemy.CurrentTile.Value.PathPositions.Count;
+                enemy.Position = Vector2.Lerp(enemy.CurrentStartPoint, enemy.CurrentEndPoint, enemy.TravelPercentage);
+
+                if (enemy.TravelPercentage >= 1)
+                {
+                    enemy.TravelPercentage = 0;
+                    enemy.CurrentPointIndex++;
+                    if (enemy.CurrentPointIndex == enemy.CurrentTile.Value.PathPositions.Count)
+                    {
+                        enemy.PreviousTile = enemy.Path.Peek();
+                        enemy.Path.Pop();
+
+                        if (enemy.Path.Count != 0)
+                        {
+                            enemy.CurrentTile = enemy.Path.Peek();
+                            enemy.CurrentPointIndex = 1;
+                            if (!((enemy.PreviousTile.Value.PathPositions.Last() + enemy.PreviousTile.Value.Position).VEquals(enemy.CurrentTile.Value.PathPositions.First() + enemy.Path.Peek().Value.Position)))
+                            {
+                                enemy.CurrentTile.Value.PathPositions.Reverse();
+                            }
+
+                        }
+                        else
+                        {
+                            //Count how many troops crossed, then see if its more than
+                            //some arbitrary number, then switch state
+                            while (true)
+                            {
+
+                            }
+                        }
+                    }
+
+                    enemy.CurrentStartPoint = enemy.CurrentTile.Value.PathPositions[enemy.CurrentPointIndex - 1] + enemy.Path.Peek().Value.Position;
+                    enemy.CurrentEndPoint = enemy.CurrentTile.Value.PathPositions[enemy.CurrentPointIndex] + enemy.Path.Peek().Value.Position;
+                }
+            
         }
 
         private (int row, int col) GridIndex(Tile tile)
@@ -456,11 +392,6 @@ namespace TowerDefenseGameWillFinishThisOne
                 //DrawGridLines(spriteBatch, tempTile.HitBox.Width, tempTile.HitBox.Height);
             }
             base.Draw(spriteBatch);
-            if (temprect != null)
-            {
-                spriteBatch.Draw(pixel1, temprect, Color.Yellow);
-                spriteBatch.Draw(pixel1, temprect1, Color.Yellow);
-            }
         }
     }
 }

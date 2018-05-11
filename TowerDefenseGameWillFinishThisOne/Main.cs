@@ -72,7 +72,6 @@ namespace TowerDefenseGameWillFinishThisOne
             pixel.SetData(new[] { Color.White });
 
             Tint = new Sprite(pixel, Vector2.Zero, Color.Black * 0.45f, new Vector2(Background.Texture.Width, Background.Texture.Height));
-
        
             screens.Add(ScreenStates.Title, new TitleScreen(GraphicsDevice, Content));
             screens.Add(ScreenStates.Game, new GameScreen(GraphicsDevice, Content));

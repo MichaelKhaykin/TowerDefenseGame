@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+using Microsoft.Xna.Framework;
 
 namespace TowerDefenseGameWillFinishThisOne
 {
@@ -11,6 +13,8 @@ namespace TowerDefenseGameWillFinishThisOne
     {
         public Texture2D Texture;
         public ConnectionTypes[] Connections;
+
+        public List<Vector2> PathPositions = new List<Vector2>();
 
         public TileCreateInfo(Texture2D texture, params ConnectionTypes[] connectionTypes)
         {

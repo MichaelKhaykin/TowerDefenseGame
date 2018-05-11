@@ -19,6 +19,8 @@ namespace TowerDefenseGameWillFinishThisOne
         
         public ConnectionTypes[] Connections { get; set; }
 
+        public List<Vector2> PathPositions = new List<Vector2>();
+
         public string Name { get; set; }
 
         public Vector2 GridPosition { get; set; }
@@ -29,6 +31,7 @@ namespace TowerDefenseGameWillFinishThisOne
         public Tile(TileCreateInfo tileInfo, Vector2 position, Vector2 scale, string name)
             : base(tileInfo.Texture, position, Color.White, scale)
         {
+            PathPositions = tileInfo.PathPositions;
             Connections = tileInfo.Connections;
             Name = name;
         }

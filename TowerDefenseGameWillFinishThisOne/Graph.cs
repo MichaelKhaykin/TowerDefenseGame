@@ -164,6 +164,7 @@ namespace TowerDefenseGameWillFinishThisOne
                 Vertices[i].FScore = double.PositiveInfinity;
                 Vertices[i].GScore = double.PositiveInfinity;
                 Vertices[i].Founder = null;
+                Vertices[i].hasBeenVisited = false;
             }
 
             startingVertex.GScore = 0;

@@ -104,7 +104,7 @@ namespace TowerDefenseGameWillFinishThisOne
             topLeftRoadPiece.Tag = new TileCreateInfo(Content.Load<Texture2D>("RoadPieces/LeftUpArcPiece"), ConnectionTypes.Left, ConnectionTypes.Bottom);
             bottomRightRoadPiece.Tag = new TileCreateInfo(Content.Load<Texture2D>("RoadPieces/RightDownArcPiece"), ConnectionTypes.Right, ConnectionTypes.Top);
             bottomLeftRoadPiece.Tag = new TileCreateInfo(Content.Load<Texture2D>("RoadPieces/LeftDownArcPiece"), ConnectionTypes.Left, ConnectionTypes.Top);
-            straightHorizontalPiece.Tag = new TileCreateInfo(Content.Load<Texture2D>("RoadPieces/StraightHorizontalPiece"), ConnectionTypes.Right, ConnectionTypes.Left);
+            straightHorizontalPiece.Tag = new TileCreateInfo(Content.Load<Texture2D>("RoadPieces/StraightHorizontalPiece"),ConnectionTypes.Right, ConnectionTypes.Left);
             straightVerticalPiece.Tag = new TileCreateInfo(Content.Load<Texture2D>("RoadPieces/StraightVerticalPiece"), ConnectionTypes.Bottom, ConnectionTypes.Top);
             fourSideCrossPiece.Tag = new TileCreateInfo(Content.Load<Texture2D>("RoadPieces/4SideCrossPiece"), ConnectionTypes.Top, ConnectionTypes.Bottom, ConnectionTypes.Right, ConnectionTypes.Left);
 
