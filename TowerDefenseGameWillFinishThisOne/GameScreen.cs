@@ -37,6 +37,8 @@ namespace TowerDefenseGameWillFinishThisOne
 
         Stopwatch timeForSpawningNewEnemy = new Stopwatch();
 
+        public static int troopCrossedCounter = 0;
+
         Tower temp;
 
         Texture2D pixel1;
@@ -175,6 +177,21 @@ namespace TowerDefenseGameWillFinishThisOne
             }
         }
 
+        private void AddTroop(Enemy enemy)
+        {
+            enemy.Path = MakeMapScreen.TilesGraph.AStar(startingVertex, endingVertex);
+            enemy.PreviousTile = enemy.Path.Peek();
+            enemy.CurrentTile = enemy.Path.Peek();
+            enemy.CurrentPointIndex = 1;
+            enemy.CurrentStartPoint = enemy.CurrentTile.PathPositions[0] + enemy.Path.Peek().Position;
+            enemy.CurrentEndPoint = enemy.CurrentTile.PathPositions[1] + enemy.Path.Peek().Position;
+
+            troops.Add(enemy);
+            enemy.ID = troops.Count;
+
+            Sprites.Add(enemy);
+        }
+
         public override void Update(GameTime gameTime)
         {
             elpasedTimeToCross += gameTime.ElapsedGameTime;
@@ -187,7 +204,7 @@ namespace TowerDefenseGameWillFinishThisOne
 
                 if (troops[i] != null)
                 {
-                    MoveAcrossTile(troops[i]);
+                    troops[i].MoveAcrossTile();
                 }
             }
             KeyboardState keyboard = Keyboard.GetState();
@@ -229,9 +246,11 @@ namespace TowerDefenseGameWillFinishThisOne
             if (LoadButton.IsClicked(Main.mouse) && !LoadButton.IsClicked(Main.oldMouse))
             {
                 LoadButton.IsVisible = false;
-           
+
                 var serializedInfo = System.IO.File.ReadAllText("NamesAndPositions.json");
                 MakeMapScreen.TilesGraph = JsonConvert.DeserializeObject<Graph<Tile, ConnectionTypes>>(serializedInfo);
+
+                // TODO: Vertex.Edges does not properly keep firstVertex or secondVertex references
 
                 foreach (var vertex in MakeMapScreen.TilesGraph.Vertices)
                 {
@@ -268,32 +287,16 @@ namespace TowerDefenseGameWillFinishThisOne
                 if (startingVertex != null && endingVertex != null)
                 {
                     var enemy = new Enemy(Content.Load<Texture2D>("sprites"), new Vector2(startingVertex.Value.Position.X - startingVertex.Value.ScaledWidth / 2, startingVertex.Value.Position.Y), frames, 100, 1, true, Color.White, new Vector2(0.05f));
-                    enemy.Path = MakeMapScreen.TilesGraph.AStar(startingVertex, endingVertex);
-                    enemy.PreviousTile = enemy.Path.Peek();
-                    enemy.CurrentTile = enemy.Path.Peek();
-                    enemy.CurrentPointIndex = 1;
-                    enemy.CurrentStartPoint = enemy.CurrentTile.Value.PathPositions[0] + enemy.Path.Peek().Value.Position;
-                    enemy.CurrentEndPoint = enemy.CurrentTile.Value.PathPositions[1] + enemy.Path.Peek().Value.Position;
-
-                    troops.Add(enemy);
-                    Sprites.Add(enemy);
+                    AddTroop(enemy);
 
                     timeForSpawningNewEnemy.Start();
                 }
             }
 
-            if(timeForSpawningNewEnemy.ElapsedMilliseconds > 3000)
+            if (timeForSpawningNewEnemy.ElapsedMilliseconds > 3000)
             {
                 var enemy = new Enemy(Content.Load<Texture2D>("sprites"), new Vector2(startingVertex.Value.Position.X - startingVertex.Value.ScaledWidth / 2, startingVertex.Value.Position.Y), frames, 100, 1, true, Color.White, new Vector2(0.05f));
-                enemy.Path = MakeMapScreen.TilesGraph.AStar(startingVertex, endingVertex);
-                enemy.PreviousTile = enemy.Path.Peek();
-                enemy.CurrentTile = enemy.Path.Peek();
-                enemy.CurrentPointIndex = 1;
-                enemy.CurrentStartPoint = enemy.CurrentTile.Value.PathPositions[0] + enemy.Path.Peek().Value.Position;
-                enemy.CurrentEndPoint = enemy.CurrentTile.Value.PathPositions[1] + enemy.Path.Peek().Value.Position;
-
-                troops.Add(enemy);
-                Sprites.Add(enemy);
+                AddTroop(enemy);
 
                 timeForSpawningNewEnemy.Restart();
             }
@@ -325,47 +328,6 @@ namespace TowerDefenseGameWillFinishThisOne
             oldkeyboard = keyboard;
 
             base.Update(gameTime);
-        }
-
-        private void MoveAcrossTile(Enemy enemy)
-        {
-                enemy.TravelPercentage += 0.01f * enemy.CurrentTile.Value.PathPositions.Count;
-                enemy.Position = Vector2.Lerp(enemy.CurrentStartPoint, enemy.CurrentEndPoint, enemy.TravelPercentage);
-
-                if (enemy.TravelPercentage >= 1)
-                {
-                    enemy.TravelPercentage = 0;
-                    enemy.CurrentPointIndex++;
-                    if (enemy.CurrentPointIndex == enemy.CurrentTile.Value.PathPositions.Count)
-                    {
-                        enemy.PreviousTile = enemy.Path.Peek();
-                        enemy.Path.Pop();
-
-                        if (enemy.Path.Count != 0)
-                        {
-                            enemy.CurrentTile = enemy.Path.Peek();
-                            enemy.CurrentPointIndex = 1;
-                            if (!((enemy.PreviousTile.Value.PathPositions.Last() + enemy.PreviousTile.Value.Position).VEquals(enemy.CurrentTile.Value.PathPositions.First() + enemy.Path.Peek().Value.Position)))
-                            {
-                                enemy.CurrentTile.Value.PathPositions.Reverse();
-                            }
-
-                        }
-                        else
-                        {
-                            //Count how many troops crossed, then see if its more than
-                            //some arbitrary number, then switch state
-                            while (true)
-                            {
-
-                            }
-                        }
-                    }
-
-                    enemy.CurrentStartPoint = enemy.CurrentTile.Value.PathPositions[enemy.CurrentPointIndex - 1] + enemy.Path.Peek().Value.Position;
-                    enemy.CurrentEndPoint = enemy.CurrentTile.Value.PathPositions[enemy.CurrentPointIndex] + enemy.Path.Peek().Value.Position;
-                }
-            
         }
 
         private (int row, int col) GridIndex(Tile tile)

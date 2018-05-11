@@ -54,7 +54,10 @@ namespace TowerDefenseGameWillFinishThisOne
 
         public TileInfo GetInfo()
         {
-            return new TileInfo(Texture.Name, Position, Connections);
+            var tileInfo = new TileInfo(Texture.Name, Position, Connections);
+            tileInfo.GridPosition = GridPosition;
+            tileInfo.PathPositions = new List<Vector2>(PathPositions);
+            return tileInfo;
         }
 
         public override bool Equals(object obj)

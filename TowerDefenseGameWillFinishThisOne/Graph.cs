@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace TowerDefenseGameWillFinishThisOne
 {
-    public class Graph<TVertex, TEdge> 
+    public class Graph<TVertex, TEdge>
+        where TVertex : Tile
     {
         public int Count { get; private set; } = 0;
 
@@ -150,7 +151,7 @@ namespace TowerDefenseGameWillFinishThisOne
             Vertices.Add(new Vertex<TVertex, TEdge>(value));
         }
 
-        public Stack<Vertex<TVertex, TEdge>> AStar(Vertex<TVertex, TEdge> startingVertex, Vertex<TVertex, TEdge> endingVertex)
+        public Stack<TileInfo> AStar(Vertex<TVertex, TEdge> startingVertex, Vertex<TVertex, TEdge> endingVertex)
         {
             if (startingVertex == null || endingVertex == null)
             {
@@ -213,14 +214,38 @@ namespace TowerDefenseGameWillFinishThisOne
                 }
             }
             //construct path
-            Stack<Vertex<TVertex, TEdge>> founders = new Stack<Vertex<TVertex, TEdge>>();
+            var founders = new Stack<Vertex<TVertex, TEdge>>();
+            var result = new Stack<TileInfo>();
 
             founders.Push(endingVertex);
-            while (founders.Peek() != startingVertex)
+
+            var endingTileInfo = endingVertex.Value.GetInfo();
+            setTileApproachedFrom(endingVertex, ref endingTileInfo);
+            result.Push(endingTileInfo);
+
+            while (!(founders.Peek() == startingVertex && founders.Peek().Founder is null))
             {
+                var tileInfo = founders.Peek().Founder.Value.GetInfo();
+                setTileApproachedFrom(founders.Peek().Founder, ref tileInfo);
+                result.Push(tileInfo);
+
                 founders.Push(founders.Peek().Founder);
             }
-            return founders;
+
+            return result;
+
+            void setTileApproachedFrom(Vertex<TVertex, TEdge> vertex, ref TileInfo tileInfo)
+            {
+                // TODO: Fix Vertex.Edges (currently not keeping references to firstVertex or secondVertex)
+                //       WORKAROUND: Search through the entire Edges collection
+
+                var connectionType = Edges.Where(e => e.firstVertex == vertex && e.secondVertex == vertex.Founder).FirstOrDefault();
+                
+                if (!(connectionType is null) && connectionType.EdgeType is ConnectionTypes connectingEdge)
+                {
+                    tileInfo.TileApproachedFrom = connectingEdge;
+                }
+            }
         }
 
         private double Euclodiean(Vertex<TVertex, TEdge> startingVertex, Vertex<TVertex, TEdge> endingVertex)

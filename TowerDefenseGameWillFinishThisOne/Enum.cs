@@ -15,7 +15,8 @@ namespace TowerDefenseGameWillFinishThisOne
         Game,
         Pause,
         Setting,
-        Rules
+        Rules,
+        LoseScreen
     }
 
     public enum ConnectionTypes 
@@ -23,7 +24,8 @@ namespace TowerDefenseGameWillFinishThisOne
         Bottom,
         Top,
         Left,
-        Right
+        Right,
+        None
     }
 
     public enum TroopMovingStates
