@@ -21,7 +21,7 @@ namespace TowerDefenseGameWillFinishThisOne
 
         private TileInfo currentTile;
         public ref TileInfo CurrentTile => ref currentTile;
-        
+
         public TileInfo PreviousTile { get; set; }
 
         public Vector2 CurrentStartPoint { get; set; }
@@ -30,19 +30,18 @@ namespace TowerDefenseGameWillFinishThisOne
         public float TravelPercentage { get; set; } = 0f;
         public int CurrentPointIndex { get; set; } = 0;
 
-        public Enemy(Texture2D texture, Vector2 position, List<(TimeSpan timeSpan, Rectangle rect)> frames, int health, int speed, bool isVisible, Color color, Vector2 scale, Texture2D pixel = null) 
+        public Enemy(Texture2D texture, Vector2 position, List<(TimeSpan timeSpan, Rectangle rect)> frames, int health, int speed, bool isVisible, Color color, Vector2 scale, Texture2D pixel = null)
             : base(texture, position, color, scale, frames, pixel)
         {
             Health = health;
             Speed = speed;
             IsVisible = isVisible;
         }
-        
+
         public void MoveAcrossTile()
         {
             //MAKE THIS A FUINCTIOn
 
-        
             if (!CurrentTile.IsPathPositionListConfigured)
             {
                 CurrentTile.IsPathPositionListConfigured = true;
@@ -50,16 +49,6 @@ namespace TowerDefenseGameWillFinishThisOne
                 switch (CurrentTile.TileApproachedFrom)
                 {
                     case ConnectionTypes.Bottom:
-                        if (ID == 1)
-                        {
-                            ;
-                        }
-
-                        if (ID == 2)
-                        {
-                            ;
-                        }
-
                         if (CurrentTile.PathPositions.Last().Y > CurrentTile.PathPositions.First().Y)
                         {
                             CurrentTile.ReversePathPositions();
@@ -86,12 +75,14 @@ namespace TowerDefenseGameWillFinishThisOne
                             CurrentTile.ReversePathPositions();
                         }
                         break;
-
-                    case ConnectionTypes.None:
-
-                        break;
                 }
+                IsVisible = true;
             }
+
+
+            CurrentStartPoint = CurrentTile.PathPositions[CurrentPointIndex - 1] + CurrentTile.Position;
+            CurrentEndPoint = CurrentTile.PathPositions[CurrentPointIndex] + CurrentTile.Position;
+
 
             TravelPercentage += 0.01f * CurrentTile.PathPositions.Count;
             Position = Vector2.Lerp(CurrentStartPoint, CurrentEndPoint, TravelPercentage);
@@ -100,7 +91,7 @@ namespace TowerDefenseGameWillFinishThisOne
             {
                 TravelPercentage = 0;
                 CurrentPointIndex++;
-            
+
                 if (CurrentPointIndex == CurrentTile.PathPositions.Count)
                 {
                     PreviousTile = Path.Peek();
@@ -116,16 +107,6 @@ namespace TowerDefenseGameWillFinishThisOne
                             switch (CurrentTile.TileApproachedFrom)
                             {
                                 case ConnectionTypes.Bottom:
-                                    if (ID == 1)
-                                    {
-                                        ;
-                                    }
-
-                                    if (ID == 2)
-                                    {
-                                        ;
-                                    }
-
                                     if (CurrentTile.PathPositions.Last().Y > CurrentTile.PathPositions.First().Y)
                                     {
                                         CurrentTile.ReversePathPositions();
@@ -152,11 +133,8 @@ namespace TowerDefenseGameWillFinishThisOne
                                         CurrentTile.ReversePathPositions();
                                     }
                                     break;
-
-                                case ConnectionTypes.None:
-
-                                    break;
                             }
+                            IsVisible = true;
                         }
 
 
@@ -165,7 +143,7 @@ namespace TowerDefenseGameWillFinishThisOne
                     else
                     {
                         IsVisible = false;
-
+                       
                         GameScreen.troopCrossedCounter++;
                         if (GameScreen.troopCrossedCounter > 10)
                         {

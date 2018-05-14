@@ -185,6 +185,7 @@ namespace TowerDefenseGameWillFinishThisOne
             enemy.CurrentPointIndex = 1;
             enemy.CurrentStartPoint = enemy.CurrentTile.PathPositions[0] + enemy.Path.Peek().Position;
             enemy.CurrentEndPoint = enemy.CurrentTile.PathPositions[1] + enemy.Path.Peek().Position;
+            enemy.IsVisible = false;
 
             troops.Add(enemy);
             enemy.ID = troops.Count;
@@ -205,6 +206,11 @@ namespace TowerDefenseGameWillFinishThisOne
                 if (troops[i] != null)
                 {
                     troops[i].MoveAcrossTile();
+                    if (troops[i].IsVisible == false)
+                    {
+                        troops.RemoveAt(i);
+                        i--;
+                    }
                 }
             }
             KeyboardState keyboard = Keyboard.GetState();

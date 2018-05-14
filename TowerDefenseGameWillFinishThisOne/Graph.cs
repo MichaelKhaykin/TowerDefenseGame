@@ -227,9 +227,15 @@ namespace TowerDefenseGameWillFinishThisOne
             {
                 var tileInfo = founders.Peek().Founder.Value.GetInfo();
                 setTileApproachedFrom(founders.Peek().Founder, ref tileInfo);
+                if (founders.Peek().Founder == startingVertex)
+                {
+                    tileInfo.TileApproachedFrom = result.Peek().TileApproachedFrom;
+                }
                 result.Push(tileInfo);
 
                 founders.Push(founders.Peek().Founder);
+
+
             }
 
             return result;
