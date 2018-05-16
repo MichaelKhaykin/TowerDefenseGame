@@ -82,10 +82,10 @@ namespace TowerDefenseGameWillFinishThisOne
             var tower2 = Main.CreateButton(graphics, backgroundBoxTexture, Content.Load<Texture2D>("Towers/Tower2"), new Vector2(tower1.Position.X, tower1.Y - tower1.ScaledHeight));
             var tower3 = Main.CreateButton(graphics, backgroundBoxTexture, Content.Load<Texture2D>("Towers/Tower3"), new Vector2(tower2.Position.X, tower2.Y - tower2.ScaledHeight));
 
-            
-            tower1.Tag = new Tower(Content.Load<Texture2D>("Towers/Tower1"), new Vector2(-100, -100), Color.White, new Vector2(0.3f), 171, 2, 5, TimeSpan.FromMilliseconds(2000));
-            tower2.Tag = new Tower(Content.Load<Texture2D>("Towers/Tower2"), new Vector2(-100, -100), Color.White, new Vector2(0.3f), 171, 10, 15, TimeSpan.FromMilliseconds(2000));
-            tower3.Tag = new Tower(Content.Load<Texture2D>("Towers/Tower3"), new Vector2(-100, -100), Color.White, new Vector2(0.3f), 171, 5, 10, TimeSpan.FromMilliseconds(2000));
+
+            tower1.Tag = new Tower(Content.Load<Texture2D>("Towers/Tower1"), new Vector2(-100, -100), Color.White, new Vector2(0.3f), 171, 2, 5, content);
+            tower2.Tag = new Tower(Content.Load<Texture2D>("Towers/Tower2"), new Vector2(-100, -100), Color.White, new Vector2(0.3f), 171, 10, 15, content);
+            tower3.Tag = new Tower(Content.Load<Texture2D>("Towers/Tower3"), new Vector2(-100, -100), Color.White, new Vector2(0.3f), 171, 5, 10, content);
 
             TowerButtons.Add(tower1);
             TowerButtons.Add(tower2);
@@ -107,8 +107,6 @@ namespace TowerDefenseGameWillFinishThisOne
             Sprites.Add((BaseSprite)tower1.Tag);
             Sprites.Add((BaseSprite)tower2.Tag);
             Sprites.Add((BaseSprite)tower3.Tag);
-
-
         }
 
         private void SetUpFrames()
@@ -204,27 +202,45 @@ namespace TowerDefenseGameWillFinishThisOne
         public override void Update(GameTime gameTime)
         {
             elpasedTimeToCross += gameTime.ElapsedGameTime;
-            
-            
+
             if (troops.Count > 0)
             {
                 //Tower stuff here
                 for (int i = 0; i < Towers.Count; i++)
                 {
-                    Towers[i].ElapsedFireRate += gameTime.ElapsedGameTime;
-                    for (int j = 0; j < troops.Count; j++)
+                    if (Towers[i].Arrow.Target is null)
                     {
-                        if (Towers[i].Range > Vector2.Distance(Towers[i].Position, troops[j].Position))
+
+                        //Aquire new target
+                        for (int j = 0; j < troops.Count; j++)
                         {
-                            if (Towers[i].ElapsedFireRate > Towers[i].FireRate)
+                            if (Towers[i].Range > Vector2.Distance(Towers[i].Position, troops[j].Position))
                             {
-                                troops[j].HealthBarWidth -= Towers[i].Damage;
-                                Towers[i].ElapsedFireRate = TimeSpan.Zero;
+                                Towers[i].Arrow.Target = troops[j];
+                                break;
                             }
-                            if (troops[j].HealthBarWidth < 0)
+                        }
+                    }
+
+                    if (Towers[i].Arrow.HitTarget())
+                    {
+                        Towers[i].Arrow.Position = Towers[i].Position;
+                        Towers[i].Arrow.Target.HealthBarWidth -= Towers[i].Damage;
+
+                        if (Towers[i].Arrow.Target.HealthBarWidth < 0)
+                        {
+                            troops.Remove(Towers[i].Arrow.Target);
+                            Towers[i].Arrow.Target = null;
+
+                        }
+                    }
+                    else
+                    {
+                        if (Towers[i].Arrow.Target != null)
+                        {
+                            if (!(Towers[i].Range > Vector2.Distance(Towers[i].Position, Towers[i].Arrow.Target.Position)))
                             {
-                                troops.Remove(troops[j]);
-                                j--;
+                                Towers[i].Arrow.Target = null;
                             }
                         }
                     }
@@ -315,11 +331,6 @@ namespace TowerDefenseGameWillFinishThisOne
                     TilesArray[x, y] = vertex.Value;
                     vertex.Value.Scale = new Vector2(Main.ScreenScale * Main.SpriteScales[vertex.Value.Name]);
                     vertex.Point = new Pointy { X = vertex.Value.Position.X, Y = vertex.Value.Position.Y };
-                    //Position calculation needs to be re-done
-
-                    // z -> x,y
-                    // z % width = x
-                    // z / width = y
 
                     int index = y * TilesArray.GetLength(0) + x;
                     vertex.Value.Position = grid.Squares[index].Center;
@@ -358,7 +369,7 @@ namespace TowerDefenseGameWillFinishThisOne
                 if (towerbutton.IsClicked(Main.mouse) && !towerbutton.IsClicked(Main.oldMouse))
                 {
                     var tag = (Tower)towerbutton.Tag;
-                    temp = new Tower(tag.Texture, tag.Position, Color.White, tag.Scale, tag.Range, tag.Damage, tag.Cost, tag.FireRate);
+                    temp = new Tower(tag.Texture, tag.Position, Color.White, tag.Scale, tag.Range, tag.Damage, tag.Cost, Content);
                     Sprites.Add(temp);
                     Towers.Add(temp);
                     hasFinishedPlacingTower = false;
@@ -389,7 +400,7 @@ namespace TowerDefenseGameWillFinishThisOne
 
         public override void Draw(SpriteBatch spriteBatch)
         {
-         
+
             if (shouldDrawGridLines)
             {
                 if (texture != null && RectAngleToDrawAt != null)
@@ -404,6 +415,11 @@ namespace TowerDefenseGameWillFinishThisOne
             for (int i = 0; i < troops.Count; i++)
             {
                 troops[i].Draw(spriteBatch);
+            }
+
+            for (int i = 0; i < Towers.Count; i++)
+            {
+                Towers[i].Draw(spriteBatch);
             }
         }
     }

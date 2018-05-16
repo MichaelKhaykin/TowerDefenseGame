@@ -195,6 +195,7 @@ namespace TowerDefenseGameWillFinishThisOne
                     else
                     {
                         IsVisible = false;
+                        
 
                         GameScreen.troopCrossedCounter++;
                         if (GameScreen.troopCrossedCounter > 10)
